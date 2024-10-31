@@ -10,7 +10,7 @@ const SignupPage = () => {
     lastName: "",
   });
 
-  const navigate = useNavigate(); // Hook to programmatically navigate
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,12 +23,20 @@ const SignupPage = () => {
     try {
       const response = await axios.post("http://localhost:3000/signup", formData);
       console.log("Signup successful:", response.data);
-      // You can redirect the user or show a success message here
+      navigate("/dashboard");
     } catch (error) {
       if (error.response) {
-        console.error("Signup failed:", error.response.data.message);
+        // Specific error messages from the backend
+        if (error.response.status === 400 && error.response.data.message === "This Email is already used") {
+          console.error("User already exists.");
+          alert("User already exists. Please use a different email.");
+        } else {
+          console.error("Signup failed:", error.response.data.message);
+          alert("Something went wrong during signup. Please try again.");
+        }
       } else {
-        console.error("Error during signup:", error.message);
+        console.error("Network error:", error.message);
+        alert("Network error. Please check your connection.");
       }
     }
   };

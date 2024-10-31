@@ -7,7 +7,7 @@ const LoginPage = () => {
     username: "",
     password: "",
   });
-  
+
   const navigate = useNavigate(); // Hook to programmatically navigate
 
   const handleChange = (e) => {
@@ -21,7 +21,7 @@ const LoginPage = () => {
     try {
       const response = await axios.post("http://localhost:3000/login", formData);
       console.log("Login successful:", response.data);
-      // Handle successful login (e.g., redirect to dashboard)
+      navigate("/dashboard"); // Redirect to Dashboard on successful login
     } catch (error) {
       if (error.response) {
         console.error("Login failed:", error.response.data.message);
