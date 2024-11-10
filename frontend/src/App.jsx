@@ -4,6 +4,7 @@ import LandingPage from "../components/LandinPage";
 import LoginPage from "../components/LoginPage";
 import SignupPage from "../components/SignUp";
 import DashboardPage from "../components/DashboardPage";
+import './index.css'
 const App = () => {
   return (
     <Router>
