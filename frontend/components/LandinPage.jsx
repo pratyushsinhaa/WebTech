@@ -80,7 +80,7 @@ const styles = {
   },
   gamesGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gridTemplateColumns: "repeat(3, 1fr)",
     gap: "1rem",
     padding: "4rem 0",
   },
@@ -145,7 +145,7 @@ const LandingPage = () => {
         </div>
 
         <div style={styles.gamesGrid}>
-          {['Crash', 'Plinko', 'Roulette', 'Slots', 'Dice', 'Blackjack'].map((game) => (
+          {['Crash', 'Plinko', 'Mines', 'Wheel', 'Dice', 'Blackjack'].map((game) => (
             <motion.div
               key={game}
               whileHover={{ scale: 1.05 }}

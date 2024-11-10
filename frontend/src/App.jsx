@@ -7,6 +7,7 @@ import DisclaimerPage from "../components/Disclaimer";
 import DashboardPage from "../components/DashboardPage";
 import './index.css'
 import DoNotGamblePage from "../components/Donotgamblepage";
+import AboutUs from "../components/Aboutus";
 const App = () => {
   return (
     <Router>
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/donotgamble" element={<DoNotGamblePage />} />
+        <Route path="/aboutus" element={<AboutUs />} />
         <Route path="/disclaimer" element={<DisclaimerPage />} />
         <Route path="/" element={<LandingPage />} />
       </Routes>
