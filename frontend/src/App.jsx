@@ -7,8 +7,6 @@ import DisclaimerPage from "../components/Disclaimer";
 import DashboardPage from "../components/DashboardPage";
 import Plinko from "../components/plinko/plinko1/pages/Plinko.jsx";
 import './index.css'
-import DoNotGamblePage from "../components/Donotgamblepage";
-import AboutUs from "../components/Aboutus";
 import TestComponent from "../components/test.jsx";
 import DoNotGamblePage from "../components/Donotgamblepage";
 import AboutUs from "../components/Aboutus";
@@ -25,10 +23,10 @@ const App = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/donotgamble" element={<DoNotGamblePage />} />
         <Route path="/aboutus" element={<AboutUs />} />
-        <Route path="/games/plinko" element={<Plinko />} />
         <Route path="/disclaimer" element={<DisclaimerPage />} />
-        <Route path="/blackjack" element={<BlackjackGame />} />
-        <Route path="/wheel" element={<Wheel />} />
+        <Route path="/games/plinko" element={<Plinko />} />
+        <Route path="/games/blackjack" element={<BlackjackGame />} />
+        <Route path="/games/wheel" element={<Wheel />} />
         <Route path="/" element={<LandingPage />} />
         
       </Routes>
