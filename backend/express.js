@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { userValidationSignUp, userValidationLogin } = require("./auth");
 const { User, Account } = require("./db");
+const { userValidationSignUp, userValidationLogin } = require("./auth");
 
 const app = express();
 const port = 3000;
@@ -10,7 +10,6 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// User sign up route
 app.post("/signup", userValidationSignUp, async (req, res) => {
   const { username, password, firstName, lastName } = req.body;
 
@@ -52,6 +51,168 @@ app.post("/login", userValidationLogin, async (req, res) => {
         message: "Wrong Credentials",
       });
     }
+  } catch (err) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message,
+    });
+  }
+});
+
+app.get("/wallet", async (req, res) => {
+  const userId = req.userId;
+  try {
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    res.status(200).json({
+      balance: account.amount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message,
+    });
+  }
+});
+
+app.post("/wallet/deposit", async (req, res) => {
+  const { userId, amount } = req.body;
+  if (amount <= 0) {
+    return res.status(400).json({
+      message: "Amount should be greater than zero",
+    });
+  }
+
+  try {
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    account.amount += amount;
+    await account.save();
+
+    account.transactions.push({ type: "Deposit", amount, date: new Date() });
+    await account.save();
+
+    res.status(200).json({
+      message: "Deposit successful",
+      balance: account.amount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message,
+    });
+  }
+});
+
+app.post("/wallet/withdraw", async (req, res) => {
+  const { userId, amount } = req.body;
+  if (amount <= 0) {
+    return res.status(400).json({
+      message: "Amount should be greater than zero",
+    });
+  }
+
+  try {
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    if (account.amount < amount) {
+      return res.status(400).json({
+        message: "Insufficient balance",
+      });
+    }
+
+    account.amount -= amount;
+    await account.save();
+
+    account.transactions.push({ type: "Withdrawal", amount, date: new Date() });
+    await account.save();
+
+    res.status(200).json({
+      message: "Withdrawal successful",
+      balance: account.amount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message,
+    });
+  }
+});
+
+app.post("/game/bet", async (req, res) => {
+  const { userId, betAmount } = req.body;
+  if (betAmount <= 0) {
+    return res.status(400).json({
+      message: "Bet amount should be greater than zero",
+    });
+  }
+
+  try {
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res.status(404).json({
+        message: "Account not found",
+      });
+    }
+
+    if (account.amount < betAmount) {
+      return res.status(400).json({
+        message: "Insufficient balance",
+      });
+    }
+
+    account.amount -= betAmount;
+    await account.save();
+
+    account.transactions.push({
+      type: "Bet",
+      amount: betAmount,
+      date: new Date(),
+    });
+    await account.save();
+
+    const win = Math.random() > 0.5;
+    if (win) {
+      const winnings = betAmount * 2;
+      account.amount += winnings;
+      await account.save();
+
+      account.transactions.push({
+        type: "Bet Win",
+        amount: winnings,
+        date: new Date(),
+      });
+    } else {
+      account.transactions.push({
+        type: "Bet Loss",
+        amount: 0,
+        date: new Date(),
+      });
+    }
+
+    res.status(200).json({
+      message: win ? "You win!" : "You lost!",
+      balance: account.amount,
+    });
   } catch (err) {
     res.status(500).json({
       message: "Something went wrong",
