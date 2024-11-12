@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { userValidationSignUp, userValidationLogin } = require("./auth");
-const { User } = require("./db");
+const { User, Account } = require("./db");
 
 const app = express();
 const port = 3000;
