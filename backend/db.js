@@ -46,7 +46,8 @@ const accountSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
-    min: 1000,
+    default: 1000,
+    min: 0,
   },
 });
 

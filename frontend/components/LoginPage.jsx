@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -10,6 +10,7 @@ const LoginPage = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [balance, setBalance] = useState(null);
   const navigate = useNavigate();
 
   const styles = {
@@ -106,12 +107,33 @@ const LoginPage = () => {
     setError("");
   };
 
+  const fetchWalletBalance = async (token) => {
+    try {
+      const response = await axios.get("http://localhost:3000/wallet", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setBalance(response.data.balance);
+    } catch (error) {
+      console.error("Failed to fetch wallet balance:", error);
+      setError("Failed to retrieve wallet balance");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const response = await axios.post("http://localhost:3000/login", formData);
-      console.log("Login successful:", response.data);
+      const token = response.data.token;
+      
+      // Store the token in localStorage
+      localStorage.setItem("authToken", token);
+
+      // Fetch and set the wallet balance
+      await fetchWalletBalance(token);
+
       navigate("/dashboard");
     } catch (error) {
       setError(
@@ -122,6 +144,13 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      fetchWalletBalance(token);
+    }
+  }, []);
 
   return (
     <div style={styles.container}>
@@ -184,6 +213,12 @@ const LoginPage = () => {
             Sign up here
           </Link>
         </div>
+
+        {balance !== null && (
+          <div style={{ textAlign: "center", marginTop: "1.5rem", color: "#1e293b", fontSize: "1.25rem" }}>
+            Your wallet balance: ₹{balance}
+          </div>
+        )}
       </motion.div>
     </div>
   );

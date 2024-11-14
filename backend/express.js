@@ -7,11 +7,12 @@ const { userValidationSignUp, userValidationLogin } = require("./auth");
 
 const app = express();
 const port = 3000;
-const JWT_SECRET = "your_jwt_secret";
+const JWT_SECRET = "your_jwt_secret"; // Use a more secure secret in production
 
 app.use(cors());
 app.use(bodyParser.json());
 
+// Middleware to verify the token
 const authenticateToken = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
 
@@ -28,6 +29,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Sign Up
 app.post("/signup", userValidationSignUp, async (req, res) => {
   const { username, password, firstName, lastName } = req.body;
 
@@ -55,6 +57,7 @@ app.post("/signup", userValidationSignUp, async (req, res) => {
   }
 });
 
+// Login
 app.post("/login", userValidationLogin, async (req, res) => {
   const { username, password } = req.body;
 
@@ -62,13 +65,14 @@ app.post("/login", userValidationLogin, async (req, res) => {
     const user = await User.findOne({ username });
 
     if (user && user.password === password) {
+      // Generate JWT token
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
         expiresIn: "1h",
       });
 
       res.status(200).json({
         message: "Logged In",
-        token,
+        token, // Send token to the user
       });
     } else {
       res.status(400).json({
@@ -83,8 +87,9 @@ app.post("/login", userValidationLogin, async (req, res) => {
   }
 });
 
+// Get Wallet Balance (Requires JWT Authentication)
 app.get("/wallet", authenticateToken, async (req, res) => {
-  const { userId } = req.user;
+  const { userId } = req.user; // Extract userId from JWT
 
   try {
     const account = await Account.findOne({ userId });
@@ -106,6 +111,7 @@ app.get("/wallet", authenticateToken, async (req, res) => {
   }
 });
 
+// Deposit to Wallet (Requires JWT Authentication)
 app.post("/wallet/deposit", async (req, res) => {
   const { username, amount } = req.body;
 
@@ -122,6 +128,7 @@ app.post("/wallet/deposit", async (req, res) => {
   }
 
   try {
+    // Find the user by username
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -130,6 +137,7 @@ app.post("/wallet/deposit", async (req, res) => {
       });
     }
 
+    // Find the account by userId
     const account = await Account.findOne({ userId: user._id });
 
     if (!account) {
@@ -138,14 +146,18 @@ app.post("/wallet/deposit", async (req, res) => {
       });
     }
 
+    // Ensure the transactions array is initialized
     if (!account.transactions) {
-      account.transactions = [];
+      account.transactions = []; // Initialize transactions if it doesn't exist
     }
 
+    // Add the deposit amount to the account balance
     account.amount += amount;
 
+    // Add the deposit transaction
     account.transactions.push({ type: "Deposit", amount, date: new Date() });
 
+    // Save the updated account
     await account.save();
 
     res.status(200).json({
@@ -160,6 +172,7 @@ app.post("/wallet/deposit", async (req, res) => {
   }
 });
 
+// Withdraw from Wallet (Requires JWT Authentication)
 app.post("/wallet/withdraw", async (req, res) => {
   const { username, amount } = req.body;
 
@@ -176,6 +189,7 @@ app.post("/wallet/withdraw", async (req, res) => {
   }
 
   try {
+    // Find the user by username first
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -184,6 +198,7 @@ app.post("/wallet/withdraw", async (req, res) => {
       });
     }
 
+    // Find the account using the userId from the found user
     const account = await Account.findOne({ userId: user._id });
 
     if (!account) {
@@ -192,20 +207,25 @@ app.post("/wallet/withdraw", async (req, res) => {
       });
     }
 
+    // Ensure the transactions array is initialized
     if (!account.transactions) {
-      account.transactions = [];
+      account.transactions = []; // Initialize the transactions array if it doesn't exist
     }
 
+    // Check for sufficient balance
     if (account.amount < amount) {
       return res.status(400).json({
         message: "Insufficient balance",
       });
     }
 
+    // Deduct the withdrawal amount from the account balance
     account.amount -= amount;
 
+    // Add the withdrawal transaction
     account.transactions.push({ type: "Withdrawal", amount, date: new Date() });
 
+    // Save the updated account
     await account.save();
 
     res.status(200).json({

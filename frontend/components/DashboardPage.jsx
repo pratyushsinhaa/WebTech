@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Wallet from "../wallet";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const amount = 1000; // Replace with user's actual amount
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -37,11 +37,6 @@ const DashboardPage = () => {
       fontWeight: "600",
       color: "#1e293b",
       flexGrow: 1,
-    },
-    amount: {
-      fontSize: "1rem",
-      color: "#2563eb",
-      fontWeight: "500",
     },
     sidebar: {
       position: "fixed",
@@ -110,7 +105,7 @@ const DashboardPage = () => {
           &#9776;
         </button>
         <h1 style={styles.title}>Dashboard</h1>
-        <p style={styles.amount}>Amount: ₹{amount}</p>
+        <Wallet />
       </header>
 
       {isMenuOpen && (
