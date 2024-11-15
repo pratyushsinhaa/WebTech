@@ -142,7 +142,7 @@ app.post("/wallet/deposit", async (req, res) => {
       account.transactions = [];
     }
 
-    account.amount += amount;
+    account.amount += Number(amount);
 
     account.transactions.push({ type: "Deposit", amount, date: new Date() });
 

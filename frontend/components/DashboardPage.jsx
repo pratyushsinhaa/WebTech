@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import Wallet from "../wallet";
+import Wallet from "../Wallet";
 
 const DashboardPage = () => {
   const navigate = useNavigate();

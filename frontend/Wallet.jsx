@@ -7,7 +7,7 @@ const Wallet = () => {
 
   useEffect(() => {
     const fetchWalletData = async () => {
-      const token = localStorage.getItem("token"); // Retrieve token from local storage
+      const token = localStorage.getItem("authToken"); // Correct key used here
 
       if (!token) {
         setError("No token found, please log in.");
