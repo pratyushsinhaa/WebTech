@@ -220,6 +220,82 @@ app.post("/wallet/withdraw", async (req, res) => {
   }
 });
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.post("/wallet/update", authenticateToken, async (req, res) => {
+  const { balance, gameResult, betAmount } = req.body;
+  const { userId } = req.user;
+
+  if (balance === undefined || balance < 0) {
+    return res.status(400).json({ message: "Invalid balance amount" });
+  }
+
+  try {
+    const account = await Account.findOne({ userId });
+
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    // Update account balance
+    account.amount = balance;
+
+    // Handle transaction history
+    let transactionType;
+    let transactionAmount = Math.abs(balance - account.amount);
+
+    switch (gameResult) {
+      case "blackjack":
+        transactionType = "Blackjack Win (Blackjack)";
+        break;
+      case "dealer_bust":
+      case "player_wins":
+        transactionType = "Blackjack Win";
+        break;
+      case "push":
+        transactionType = "Blackjack Push";
+        break;
+      case "bust":
+      case "dealer_wins":
+        transactionType = "Blackjack Loss";
+        break;
+      default:
+        transactionType = "Game Transaction";
+    }
+
+    if (!account.transactions) {
+      account.transactions = [];
+    }
+
+    account.transactions.push({
+      type: transactionType,
+      amount: betAmount,
+      date: new Date(),
+    });
+
+    await account.save();
+
+    res.status(200).json({
+      message: "Balance updated successfully",
+      balance: account.amount,
+      transaction: account.transactions[account.transactions.length - 1],
+    });
+  } catch (err) {
+    console.error("Wallet update error:", err);
+    res.status(500).json({
+      message: "Error updating balance",
+      error: err.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running successfully on port ${port}`);
 });

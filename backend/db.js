@@ -49,6 +49,22 @@ const accountSchema = new mongoose.Schema({
     default: 1000,
     min: 0,
   },
+  transactions: [
+    {
+      type: {
+        type: String,
+        required: true,
+      },
+      amount: {
+        type: Number,
+        required: true,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

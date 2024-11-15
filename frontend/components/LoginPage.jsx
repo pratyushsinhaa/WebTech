@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Wallet from "../Wallet";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -216,7 +217,7 @@ const LoginPage = () => {
 
         {balance !== null && (
           <div style={{ textAlign: "center", marginTop: "1.5rem", color: "#1e293b", fontSize: "1.25rem" }}>
-            Your wallet balance: ₹{balance}
+            <Wallet />
           </div>
         )}
       </motion.div>
