@@ -1,7 +1,5 @@
-// DiceGame.jsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useWallet } from '../components/walletContext';
 
 const DiceGame = () => {
   const [sliderValue, setSliderValue] = useState(50);
@@ -9,33 +7,44 @@ const DiceGame = () => {
   const [multiplier, setMultiplier] = useState(2);
   const [result, setResult] = useState(null);
   const [isRolling, setIsRolling] = useState(false);
-  const { balance, updateBalance } = useWallet();
+  const [gameBalance, setGameBalance] = useState(1000);
 
-  // Calculate multiplier based on slider position
   useEffect(() => {
     const newMultiplier = (100 / sliderValue).toFixed(2);
     setMultiplier(newMultiplier);
   }, [sliderValue]);
 
-  const handleRoll = async () => {
-    if (isRolling || betAmount > balance) return;
+  const handleRoll = () => {
+    if (isRolling || betAmount > gameBalance || betAmount <= 0) return;
     
     setIsRolling(true);
     const randomNumber = Math.random() * 100;
     const won = randomNumber <= sliderValue;
     
-    // Simulate roll animation
     setTimeout(() => {
+      const payout = won ? betAmount * multiplier : 0;
       setResult({
         won,
         number: randomNumber.toFixed(2),
-        payout: won ? betAmount * multiplier : 0
+        payout
       });
       
-      // Update wallet
-      updateBalance(balance + (won ? betAmount * (multiplier - 1) : -betAmount));
+      setGameBalance(prev => 
+        won ? prev + (betAmount * (multiplier - 1)) : prev - betAmount
+      );
       setIsRolling(false);
     }, 1000);
+  };
+
+  const handleBetChange = (e) => {
+    const value = Number(e.target.value);
+    if (value > gameBalance) {
+      setBetAmount(gameBalance);
+    } else if (value < 0) {
+      setBetAmount(0);
+    } else {
+      setBetAmount(value);
+    }
   };
 
   return (
@@ -43,7 +52,11 @@ const DiceGame = () => {
       <div style={styles.gameCard}>
         <h2 style={styles.title}>Dice</h2>
         
-        {/* Slider Section */}
+        <div style={styles.balanceContainer}>
+          <span style={styles.balanceLabel}>Balance:</span>
+          <span style={styles.balanceAmount}>${gameBalance.toFixed(2)}</span>
+        </div>
+
         <div style={styles.sliderContainer}>
           <input
             type="range"
@@ -52,6 +65,7 @@ const DiceGame = () => {
             value={sliderValue}
             onChange={(e) => setSliderValue(e.target.value)}
             style={styles.slider}
+            disabled={isRolling}
           />
           <div style={styles.sliderInfo}>
             <div>
@@ -69,30 +83,34 @@ const DiceGame = () => {
           </div>
         </div>
 
-        {/* Bet Controls */}
         <div style={styles.betControls}>
           <div style={styles.betAmount}>
             <span style={styles.label}>Bet Amount</span>
             <input
               type="number"
               value={betAmount}
-              onChange={(e) => setBetAmount(Number(e.target.value))}
+              onChange={handleBetChange}
               style={styles.input}
+              disabled={isRolling}
+              min="0"
+              max={gameBalance}
             />
           </div>
           
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            style={styles.button}
+            style={{
+              ...styles.button,
+              opacity: (isRolling || betAmount > gameBalance || betAmount <= 0) ? 0.5 : 1
+            }}
             onClick={handleRoll}
-            disabled={isRolling || betAmount > balance}
+            disabled={isRolling || betAmount > gameBalance || betAmount <= 0}
           >
             {isRolling ? 'Rolling...' : 'Roll Dice'}
           </motion.button>
         </div>
 
-        {/* Result Display */}
         {result && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -104,7 +122,7 @@ const DiceGame = () => {
           >
             <span style={styles.resultNumber}>{result.number}</span>
             <span style={styles.resultText}>
-              {result.won ? `Won ${result.payout.toFixed(2)}` : 'Lost'}
+              {result.won ? `Won $${result.payout.toFixed(2)}` : 'Lost'}
             </span>
           </motion.div>
         )}
@@ -127,11 +145,26 @@ const styles = {
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
     padding: "2rem",
   },
+  balanceContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: "1.5rem",
+  },
+  balanceLabel: {
+    color: "#64748b",
+    marginRight: "0.5rem",
+  },
+  balanceAmount: {
+    color: "#1e293b",
+    fontWeight: "600",
+    fontSize: "1.25rem",
+  },
   title: {
     fontSize: "1.5rem",
     fontWeight: 600,
     color: "#1e293b",
-    marginBottom: "2rem",
+    marginBottom: "1rem",
   },
   sliderContainer: {
     marginBottom: "2rem",

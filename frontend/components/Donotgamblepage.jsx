@@ -129,7 +129,7 @@ const DoNotGamblePage = () => {
         </div>
 
         <motion.button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/login")}
           style={styles.button}
           whileHover={{ backgroundColor: "#1d4ed8", scale: 1.05 }}
           whileTap={{ scale: 0.98 }}

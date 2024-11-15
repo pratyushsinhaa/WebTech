@@ -128,7 +128,7 @@ const SignupPage = () => {
     try {
       const response = await axios.post("http://localhost:3000/signup", formData);
       console.log("Signup successful:", response.data);
-      navigate("/dashboard");
+      navigate("/disclaimer");
     } catch (error) {
       setError(
         error.response?.data?.message || 
