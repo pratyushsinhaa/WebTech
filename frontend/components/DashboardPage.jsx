@@ -96,13 +96,13 @@ const DashboardPage = () => {
     { name: "Logout", action: () => navigate("/login") },
   ];
 
-  const games = ["Crash", "Plinko", "Mines", "Wheel", "Dice", "Blackjack"];
+  const games = ["Crash", "Plinko", "Mines", "Craps", "Dice", "Blackjack"];
 
   return (
     <div style={styles.container}>
       <header style={styles.header}>
         <button onClick={toggleMenu} style={styles.menuButton}>
-          &#9776;
+          &#9776;{/* Hamburger icon */}
         </button>
         <h1 style={styles.title}>Dashboard</h1>
         <Wallet />

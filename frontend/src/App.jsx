@@ -12,6 +12,8 @@ import DoNotGamblePage from "../components/Donotgamblepage";
 import AboutUs from "../components/Aboutus";
 import BlackjackGame from "../components/BlackjackGame";
 import Wheel from "../components/Wheel";
+import Dice from "../components/Dice";
+import Crash from "../components/Crash";
 import './index.css';
 
 const App = () => {
@@ -25,6 +27,8 @@ const App = () => {
         <Route path="/aboutus" element={<AboutUs />} />
         <Route path="/disclaimer" element={<DisclaimerPage />} />
         <Route path="/games/plinko" element={<Plinko />} />
+        <Route path="/games/crash" element={<Crash />} />
+        <Route path="/games/dice" element={<Dice />} />
         <Route path="/games/blackjack" element={<BlackjackGame />} />
         <Route path="/games/wheel" element={<Wheel />} />
         <Route path="/" element={<LandingPage />} />
