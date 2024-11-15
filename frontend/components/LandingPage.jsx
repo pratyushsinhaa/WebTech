@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
+    background: "linear-gradient(to bottom, #A4D7E1, #FFFFFF)", // Soft Blue to White gradient
   },
   nav: {
     position: "fixed",
     width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     backdropFilter: "blur(8px)",
     zIndex: 10,
   },
@@ -25,11 +25,11 @@ const styles = {
   logo: {
     fontSize: "1.5rem",
     fontWeight: 600,
-    color: "#1e293b",
+    color: "#004D4D", // Dark Blue
   },
   button: {
-    backgroundColor: "#2563eb",
-    color: "white",
+    backgroundColor: "#004D4D", // Dark Blue
+    color: "#FFFFFF",
     padding: "0.5rem 1rem",
     borderRadius: "0.5rem",
     border: "none",
@@ -48,12 +48,12 @@ const styles = {
   heroTitle: {
     fontSize: "3rem",
     fontWeight: "bold",
-    color: "#1e293b",
+    color: "#004D4D", // Dark Blue
     marginBottom: "1.5rem",
   },
   heroParagraph: {
     fontSize: "1.25rem",
-    color: "#475569",
+    color: "#475569", // Medium gray for contrast
     maxWidth: "42rem",
     margin: "0 auto 2rem auto",
   },
@@ -64,7 +64,7 @@ const styles = {
     padding: "4rem 0",
   },
   featureCard: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF", // White for contrast
     padding: "1.5rem",
     borderRadius: "0.75rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -72,11 +72,11 @@ const styles = {
   featureTitle: {
     fontSize: "1.25rem",
     fontWeight: 600,
-    color: "#1e293b",
+    color: "#A4D7E1", // Soft Blue
     marginBottom: "1rem",
   },
   featureText: {
-    color: "#475569",
+    color: "#475569", // Medium gray for readability
   },
   gamesGrid: {
     display: "grid",
@@ -85,7 +85,7 @@ const styles = {
     padding: "4rem 0",
   },
   gameCard: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF", // White for contrast
     padding: "1rem",
     borderRadius: "0.5rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
