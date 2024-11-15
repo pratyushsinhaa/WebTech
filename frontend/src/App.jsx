@@ -16,6 +16,7 @@ import Dice from "../components/Dice";
 import Crash from "../components/Crash";
 import Mines from "../components/Mines";
 import './index.css';
+import Craps from "../components/Craps.jsx";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/games/crash" element={<Crash />} />
         <Route path="/games/dice" element={<Dice />} />
         <Route path="/games/mines" element={<Mines />} />
+        <Route path="/games/craps" element={<Craps />} />
         <Route path="/games/blackjack" element={<BlackjackGame />} />
         <Route path="/games/wheel" element={<Wheel />} />
         <Route path="/" element={<LandingPage />} />
