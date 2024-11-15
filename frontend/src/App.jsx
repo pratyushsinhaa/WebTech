@@ -14,6 +14,7 @@ import BlackjackGame from "../components/BlackjackGame";
 import Wheel from "../components/Wheel";
 import Dice from "../components/Dice";
 import Crash from "../components/Crash";
+import Mines from "../components/Mines";
 import './index.css';
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/games/plinko" element={<Plinko />} />
         <Route path="/games/crash" element={<Crash />} />
         <Route path="/games/dice" element={<Dice />} />
+        <Route path="/games/mines" element={<Mines />} />
         <Route path="/games/blackjack" element={<BlackjackGame />} />
         <Route path="/games/wheel" element={<Wheel />} />
         <Route path="/" element={<LandingPage />} />
