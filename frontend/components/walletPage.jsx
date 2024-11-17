@@ -1,108 +1,164 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
-};
 
 const WalletPage = () => {
   const navigate = useNavigate();
-  const [balance, setBalance] = useState(1000);
-  const [transactions] = React.useState([]);
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showDepositAlert, setShowDepositAlert] = useState(false);
 
-  const handleDeposit = () => {
-    setBalance(prevBalance => prevBalance + 1000);
+  const fetchWalletData = async () => {
+    const token = localStorage.getItem("authToken");
+    
+    if (!token) {
+      setError("Please log in to make a deposit");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/wallet", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch wallet data');
+      }
+
+      const data = await response.json();
+      setBalance(data.balance);
+      if (data.balance === 0) {
+        setShowDepositAlert(true);
+      }
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch wallet data");
+      setLoading(false);
+    }
   };
 
-  const handleWithdraw = () => {
-    setBalance(prevBalance => prevBalance - 1000);
+  const handleDeposit = async () => {
+    const token = localStorage.getItem("authToken");
+    const username = localStorage.getItem("username");
+
+    if (!token || !username) {
+      setError("Please log in to make a deposit");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/wallet/deposit", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username,
+          amount: 1000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to make deposit');
+      }
+
+      const data = await response.json();
+      setBalance(data.balance);
+      setShowDepositAlert(false);
+      await fetchWalletData(); // Refresh wallet data after deposit
+    } catch (err) {
+      setError("Failed to make deposit");
+    }
   };
+
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
-      <motion.div 
-        style={styles.content}
-        initial="initial"
-        animate="animate"
-        variants={fadeIn}
-      >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <div style={styles.content}>
+        <button
           style={styles.backButton}
           onClick={() => navigate(-1)}
         >
           ← Back
-        </motion.button>
+        </button>
 
-        <motion.div 
-          style={styles.walletCard}
-          whileHover={{ y: -5 }}
-        >
+        {error && (
+          <div style={styles.errorAlert}>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {showDepositAlert && (
+          <div style={styles.depositAlert}>
+            <p>Your balance is low. Consider adding more funds to continue playing.</p>
+          </div>
+        )}
+
+        <div style={styles.walletCard}>
           <div style={styles.balanceSection}>
             <h2 style={styles.balanceLabel}>Available Balance</h2>
-            <motion.div 
-              style={styles.balanceAmount}
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-            >
+            <div style={styles.balanceAmount}>
               ₹{balance.toFixed(2)}
-            </motion.div>
+            </div>
           </div>
 
           <div style={styles.buttonGroup}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={styles.actionButton}
+            <button
+              style={styles.depositButton}
               onClick={handleDeposit}
             >
-              Deposit
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{...styles.actionButton, backgroundColor: "#dc2626"}}
-              onClick={handleWithdraw}
-            >
-              Withdraw
-            </motion.button>
+              Add ₹1000
+            </button>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          style={styles.transactionsCard}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <div style={styles.transactionsCard}>
           <h3 style={styles.sectionTitle}>Recent Transactions</h3>
           <div style={styles.transactionList}>
-            {transactions.map((tx) => (
-              <motion.div
-                key={tx.id}
-                style={styles.transaction}
-                whileHover={{ backgroundColor: "#f8fafc" }}
-              >
-                <div style={styles.transactionInfo}>
-                  <span style={styles.transactionType}>{tx.type}</span>
-                  <span style={styles.transactionDate}>{tx.date}</span>
+            {transactions && transactions.length > 0 ? (
+              transactions.map((tx, index) => (
+                <div
+                  key={index}
+                  style={styles.transaction}
+                >
+                  <div style={styles.transactionInfo}>
+                    <span style={styles.transactionType}>{tx.type}</span>
+                    <span style={styles.transactionDate}>
+                      {new Date(tx.date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span style={{
+                    ...styles.transactionAmount,
+                    color: tx.amount > 0 ? "#16a34a" : "#dc2626"
+                  }}>
+                    {tx.amount > 0 ? "+" : ""}{tx.amount.toFixed(2)}
+                  </span>
                 </div>
-                <span style={{
-                  ...styles.transactionAmount,
-                  color: tx.amount > 0 ? "#16a34a" : "#dc2626"
-                }}>
-                  {tx.amount > 0 ? "+" : ""}{tx.amount.toFixed(2)}
-                </span>
-              </motion.div>
-            ))}
+              ))
+            ) : (
+              <div style={styles.noTransactions}>
+                No transactions yet
+              </div>
+            )}
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -117,8 +173,15 @@ const styles = {
     maxWidth: "1152px",
     margin: "0 auto",
   },
+  loadingContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    fontSize: "1.125rem",
+  },
   backButton: {
-    backgroundColor: "transparent",
+    background: "none",
     border: "none",
     color: "#475569",
     cursor: "pointer",
@@ -127,6 +190,22 @@ const styles = {
     alignItems: "center",
     gap: "0.5rem",
     marginBottom: "2rem",
+  },
+  errorAlert: {
+    backgroundColor: "#fee2e2",
+    border: "1px solid #fecaca",
+    borderRadius: "0.5rem",
+    padding: "1rem",
+    marginBottom: "1rem",
+    color: "#dc2626",
+  },
+  depositAlert: {
+    backgroundColor: "#fef9c3",
+    border: "1px solid #fef08a",
+    borderRadius: "0.5rem",
+    padding: "1rem",
+    marginBottom: "1rem",
+    color: "#854d0e",
   },
   walletCard: {
     backgroundColor: "white",
@@ -151,10 +230,9 @@ const styles = {
   },
   buttonGroup: {
     display: "flex",
-    gap: "1rem",
     justifyContent: "center",
   },
-  actionButton: {
+  depositButton: {
     backgroundColor: "#2563eb",
     color: "white",
     padding: "0.75rem 1.5rem",
@@ -163,6 +241,7 @@ const styles = {
     cursor: "pointer",
     fontSize: "1rem",
     fontWeight: "500",
+    transition: "all 0.2s",
   },
   transactionsCard: {
     backgroundColor: "white",
@@ -187,6 +266,9 @@ const styles = {
     alignItems: "center",
     padding: "1rem",
     borderRadius: "0.5rem",
+    backgroundColor: "white",
+    transition: "background-color 0.2s",
+    cursor: "default",
   },
   transactionInfo: {
     display: "flex",
@@ -202,6 +284,11 @@ const styles = {
   },
   transactionAmount: {
     fontWeight: "600",
+  },
+  noTransactions: {
+    textAlign: "center",
+    color: "#64748b",
+    padding: "2rem 0",
   },
 };
 

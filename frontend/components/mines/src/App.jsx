@@ -1,157 +1,201 @@
-// src/App.jsx
-import { useState, useEffect } from "react";
-import "./App.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function App() {
-  const [wallet, setWallet] = useState(1000); // Initial wallet balance
-  const [betAmount, setBetAmount] = useState(0);
-  const [numMines, setNumMines] = useState(3); // Default number of mines
-  const [grid, setGrid] = useState([]);
-  const [gameStatus, setGameStatus] = useState("waiting"); // "waiting" | "running" | "lost" | "won"
-  const [multiplier, setMultiplier] = useState(1.1); // Start multiplier slightly above 1
-  const [revealedTiles, setRevealedTiles] = useState([]);
-  const [profit, setProfit] = useState(0);
-  const [finalMultiplier, setFinalMultiplier] = useState(null); // Store the final multiplier at cash out
+const App = () => {
+  const [balance, setBalance] = useState(0); // User's wallet balance
+  const [bet, setBet] = useState(10); // Bet amount
+  const [message, setMessage] = useState('');
+  const [gameStatus, setGameStatus] = useState('idle'); // Game status
+  const [tiles, setTiles] = useState([]); // Game grid/tiles
+  const [revealedTiles, setRevealedTiles] = useState([]); // Revealed tiles
+  const [mines, setMines] = useState([]); // Positions of mines
 
-  // Start the game and set mines
-  const startGame = () => {
-    if (betAmount > 0 && betAmount <= wallet) {
-      setGameStatus("running");
-      setMultiplier(1.1); // Start multiplier from 1.1
-      setRevealedTiles([]);
-      setProfit(0);
-      setFinalMultiplier(null);
-      setGrid(generateGrid());
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  const fetchBalance = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setMessage('Authentication token not found. Please log in again.');
+        return;
+      }
+
+      const response = await axios.get('http://localhost:3000/wallet', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Assuming the backend sends balance in rupees. If it's in dollars, apply conversion.
+      const userBalance = response.data.balance; // Ensure this is in ₹
+      setBalance(userBalance); // Display the correct value
+    } catch (error) {
+      console.error('Error fetching balance:', error.response?.data || error.message);
+      setMessage('Error fetching balance. Please try again.');
     }
   };
 
-  // Generate a grid with mines randomly placed
-  const generateGrid = () => {
-    const gridSize = 25;
-    let mines = Array(gridSize).fill(false);
-    let minePositions = new Set();
-    while (minePositions.size < numMines) {
-      minePositions.add(Math.floor(Math.random() * gridSize));
+  const updateBalance = async (adjustment, gameResult) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setMessage('Authentication token not found. Please log in again.');
+        return false;
+      }
+
+      const response = await axios.post(
+        'http://localhost:3000/wallet/update',
+        {
+          balance: balance + adjustment, // Adjust balance
+          gameResult,
+          betAmount: Math.abs(adjustment), // Log the bet amount
+        },
+        {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        }
+      );
+
+      await fetchBalance(); // Synchronize balance
+      return true;
+    } catch (error) {
+      console.error('Error updating balance:', error.response?.data || error.message);
+      setMessage('Error updating balance. Please try again.');
+      return false;
     }
-    minePositions.forEach((pos) => (mines[pos] = true));
-    return mines;
   };
 
-  // Handle clicking on a tile
-  const revealTile = (index) => {
-    if (gameStatus !== "running" || revealedTiles.includes(index)) return;
+  const startGame = async () => {
+    if (bet > balance) {
+      setMessage('Insufficient balance. Please lower your bet.');
+      return;
+    }
 
-    if (grid[index]) {
-      // Hit a mine
-      setGameStatus("lost");
+    const success = await updateBalance(-bet, 'bet');
+    if (!success) {
+      setMessage('Failed to place bet. Try again.');
+      return;
+    }
+
+    initializeGame();
+  };
+
+  const initializeGame = () => {
+    const gridSize = 5; // Example 5x5 grid
+    const mineCount = 5; // Example number of mines
+
+    const allTiles = Array.from({ length: gridSize * gridSize }, (_, i) => i);
+    const shuffledTiles = [...allTiles].sort(() => Math.random() - 0.5);
+    const minePositions = shuffledTiles.slice(0, mineCount);
+
+    setTiles(allTiles);
+    setMines(minePositions);
+    setRevealedTiles([]);
+    setGameStatus('playing');
+    setMessage('Game started! Avoid the mines.');
+  };
+
+  const revealTile = async (tile) => {
+    if (gameStatus !== 'playing' || revealedTiles.includes(tile)) return;
+
+    if (mines.includes(tile)) {
+      setGameStatus('lost');
+      setMessage('You hit a mine! Game over.');
+      await updateBalance(0, 'lost'); // Backend tracks loss
     } else {
-      // Safe tile
-      setRevealedTiles((prev) => [...prev, index]);
-      const newMultiplier = calculateMultiplier();
-      setMultiplier(newMultiplier);
+      const newRevealedTiles = [...revealedTiles, tile];
+      setRevealedTiles(newRevealedTiles);
+
+      // Check win condition
+      if (newRevealedTiles.length === tiles.length - mines.length) {
+        const winnings = bet * 2; // Example winnings: double the bet
+        setGameStatus('won');
+        setMessage(`You won! Winnings: ₹${winnings}`);
+        await updateBalance(winnings, 'won');
+      }
     }
   };
 
-  // Function to calculate multiplier based on revealed tiles and number of mines
-  const calculateMultiplier = () => {
-    const baseMultiplier = 1.1; // Start multiplier slightly above 1
-    const revealedCount = revealedTiles.length;
-
-    // Adjust growth factors based on the number of mines
-    const minimumGrowth = 0.05; // Minimum increase per tile for all games
-    const mineFactor = numMines > 2 ? 0.25 + (numMines - 3) * 0.25 : 0.15; // Adjust for lower mine counts
-    const multiplier = baseMultiplier + revealedCount * (minimumGrowth + mineFactor);
-
-    return Math.max(multiplier, 1.1).toFixed(2); // Ensure minimum multiplier to avoid negative profit
-  };
-
-  // Cash out and collect profit
-  const cashOut = () => {
-    if (gameStatus === "running") {
-      setGameStatus("won");
-      const finalMultiplier = calculateMultiplier();
-      setFinalMultiplier(finalMultiplier);
-
-      // Calculate profit
-      const currentProfit = (betAmount * finalMultiplier - betAmount).toFixed(2);
-      setProfit(currentProfit);
-
-      // Update wallet balance after cashout
-      setWallet(wallet + parseFloat(currentProfit));
-    }
+  const resetGame = () => {
+    setGameStatus('idle');
+    setTiles([]);
+    setMines([]);
+    setRevealedTiles([]);
+    setMessage('');
   };
 
   return (
-    <div className="container">
-      {/* Wallet display */}
-      <div className="wallet">
-        Wallet: ₹{wallet.toFixed(2)}
-      </div>
-
-      <h1 className="title">Mines Game</h1>
-
-      {/* Betting input */}
-      <div className="betting-area">
+    <div className="mines-container">
+      <div className="wallet-info">
+        <h2>Balance: ₹{balance}</h2>
         <input
           type="number"
-          min="1"
-          max={wallet}
-          value={betAmount}
-          onChange={(e) => setBetAmount(Number(e.target.value))}
-          placeholder="Enter Bet Amount"
-          className="bet-input"
+          value={bet}
+          onChange={(e) => setBet(Math.max(1, Number(e.target.value)))}
+          disabled={gameStatus === 'playing'}
         />
-        <input
-          type="number"
-          min="1"
-          max="24"
-          value={numMines}
-          onChange={(e) => setNumMines(Number(e.target.value))}
-          placeholder="Number of Mines"
-          className="mine-input"
-        />
+        <button onClick={startGame} disabled={gameStatus === 'playing'}>
+          Start Game
+        </button>
       </div>
 
-      <div className={`multiplier ${gameStatus}`}>
-        {gameStatus === "waiting" ? "–" : `${multiplier}x`}
-      </div>
+      {message && <div className="message">{message}</div>}
 
-      {gameStatus === "lost" && (
-        <div className="message">You hit a mine! Game Over.</div>
-      )}
-      {gameStatus === "won" && (
-        <div className="message success">
-          You cashed out at {finalMultiplier}x! <br />
-          Profit: ₹{profit}
-        </div>
-      )}
-
-      <div className="grid">
-        {grid.map((isMine, index) => (
+      <div className="game-grid">
+        {tiles.map((tile, index) => (
           <button
             key={index}
-            className={`tile ${revealedTiles.includes(index) ? "revealed" : ""}`}
-            onClick={() => revealTile(index)}
-            disabled={gameStatus !== "running"}
+            onClick={() => revealTile(tile)}
+            disabled={revealedTiles.includes(tile) || gameStatus !== 'playing'}
+            className={revealedTiles.includes(tile) ? 'revealed' : ''}
           >
-            {revealedTiles.includes(index) ? (isMine ? "💣" : "✅") : ""}
+            {revealedTiles.includes(tile)
+              ? mines.includes(tile)
+                ? '💣'
+                : '✅'
+              : ''}
           </button>
         ))}
       </div>
 
-      <div className="buttons">
-        {(gameStatus === "waiting" || gameStatus === "lost" || gameStatus === "won") ? (
-          <button className="start-btn" onClick={startGame}>
-            Start Game
-          </button>
-        ) : (
-          <button className="cashout-btn" onClick={cashOut}>
-            Cash Out
-          </button>
-        )}
-      </div>
+      {gameStatus !== 'playing' && gameStatus !== 'idle' && (
+        <button onClick={resetGame}>Reset Game</button>
+      )}
+
+      <style jsx>{`
+        .mines-container {
+          text-align: center;
+          margin: 20px;
+        }
+
+        .wallet-info {
+          margin-bottom: 20px;
+        }
+
+        .game-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 50px);
+          gap: 10px;
+          justify-content: center;
+        }
+
+        .game-grid button {
+          width: 50px;
+          height: 50px;
+          font-size: 18px;
+        }
+
+        .revealed {
+          background-color: #ddd;
+        }
+
+        .message {
+          margin: 10px 0;
+          font-size: 16px;
+          color: #555;
+        }
+      `}</style>
     </div>
   );
-}
+};
 
 export default App;
