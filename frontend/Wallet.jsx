@@ -31,13 +31,7 @@ const Wallet = () => {
   }, []);
 
   return (
-    <div>
-      {error ? (
-        <p>{error}</p>
-      ) : (
-        <p>Your wallet balance: ₹{balance}</p>
-      )}
-    </div>
+    <></>
   );
 };
 
