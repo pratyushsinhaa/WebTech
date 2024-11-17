@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 import "./Crash.css";
 
 const Crash = () => {
   const [bet, setBet] = useState(0);
-  const [balance, setBalance] = useState(1000); // Initial balance
+  const [balance, setBalance] = useState(0); // Actual wallet balance
   const [multiplier, setMultiplier] = useState(1);
   const [crashed, setCrashed] = useState(false);
   const [gameActive, setGameActive] = useState(false);
@@ -14,14 +15,63 @@ const Crash = () => {
   const HOUSE_EDGE = 0.05;
   const MAX_MULTIPLIER = 100;
 
+  // Fetch wallet balance on component mount
+  useEffect(() => {
+    const fetchBalance = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        alert("Please log in to play.");
+        return;
+      }
+
+      try {
+        const response = await axios.get("http://localhost:3000/wallet", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setBalance(response.data.balance);
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+        alert("Failed to fetch wallet balance.");
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
+  const updateWallet = async (newBalance, gameResult) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      await axios.post(
+        "http://localhost:3000/wallet/update",
+        {
+          balance: newBalance,
+          gameResult,
+          betAmount: bet,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating wallet:", error);
+      alert("Failed to update wallet.");
+    }
+  };
+
   const handleStartGame = () => {
     if (bet <= 0 || bet > balance) {
       alert("Invalid bet amount");
       return;
     }
-    
-    // Deduct bet from balance
-    setBalance(prev => prev - bet);
+
+    setBalance((prev) => prev - bet); // Deduct bet from balance
+    updateWallet(balance - bet, "start_game"); // Sync with backend
     setMultiplier(1);
     setCrashed(false);
     setGameActive(true);
@@ -29,58 +79,58 @@ const Crash = () => {
 
   const handleCashout = () => {
     if (!gameActive || crashed) return;
-    
-    // Add winnings to balance
+
     const winnings = bet * multiplier;
-    setBalance(prev => prev + winnings);
-    setProfitLoss(prev => prev + (winnings - bet));
+    setBalance((prev) => prev + winnings);
+    setProfitLoss((prev) => prev + (winnings - bet));
     setGameActive(false);
-    
-    // Add to history
-    setGameHistory(prev => [...prev, multiplier.toFixed(2)].slice(-10));
+
+    updateWallet(balance + winnings, "cashout"); // Sync with backend
+
+    setGameHistory((prev) => [...prev, multiplier.toFixed(2)].slice(-10));
   };
 
   useEffect(() => {
     let animationFrame;
     let startTime;
-    
+
     const crashPoint = Math.max(1, (1 / (1 - Math.random())) * (1 - HOUSE_EDGE));
-    
+
     const updateGame = (timestamp) => {
       if (!startTime) startTime = timestamp;
-      
+
       if (gameActive && !crashed) {
         const elapsed = (timestamp - startTime) / 1000;
         const currentMultiplier = Math.pow(Math.E, elapsed * 0.6);
-        
+
         if (currentMultiplier >= crashPoint) {
           setCrashed(true);
           setGameActive(false);
-          setProfitLoss(prev => prev - bet);
-          setGameHistory(prev => [...prev, crashPoint.toFixed(2)].slice(-10));
+          setProfitLoss((prev) => prev - bet);
+          updateWallet(balance, "crash"); // Sync crash with backend
+          setGameHistory((prev) => [...prev, crashPoint.toFixed(2)].slice(-10));
           return;
         }
-        
+
         if (currentMultiplier >= MAX_MULTIPLIER) {
           handleCashout();
           return;
         }
-        
-        // Auto cashout
+
         if (autoCashout > 0 && currentMultiplier >= autoCashout) {
           handleCashout();
           return;
         }
-        
+
         setMultiplier(currentMultiplier);
         animationFrame = requestAnimationFrame(updateGame);
       }
     };
-    
+
     if (gameActive && !crashed) {
       animationFrame = requestAnimationFrame(updateGame);
     }
-    
+
     return () => {
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
@@ -92,20 +142,21 @@ const Crash = () => {
     <div className="container">
       <div className="sidebar">
         <h1 className="title">Crash Game</h1>
-        
+
         <div className="balanceInfo">
-          <div className="balance">Balance: ${balance.toFixed(2)}</div>
+          <div className="balance">Balance: ₹{balance.toFixed(2)}</div>
           <div className="profitLoss">
-            P/L: <span style={{ color: profitLoss >= 0 ? '#10b981' : '#ef4444' }}>
-              ${profitLoss.toFixed(2)}
+            P/L:{" "}
+            <span style={{ color: profitLoss >= 0 ? "#10b981" : "#ef4444" }}>
+              ₹{profitLoss.toFixed(2)}
             </span>
           </div>
         </div>
-        
+
         <div className="controls">
           <label className="label">
             Bet Amount:
-            <input 
+            <input
               type="number"
               value={bet}
               onChange={(e) => setBet(Math.max(0, Number(e.target.value)))}
@@ -113,7 +164,7 @@ const Crash = () => {
               disabled={gameActive}
             />
           </label>
-          
+
           <label className="label">
             Auto Cashout:
             <input
@@ -126,7 +177,7 @@ const Crash = () => {
               min="1.01"
             />
           </label>
-          
+
           {!gameActive ? (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -141,14 +192,14 @@ const Crash = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              style={{backgroundColor: '#10b981'}}
+              style={{ backgroundColor: "#10b981" }}
               onClick={handleCashout}
             >
               Cashout @ {(bet * multiplier).toFixed(2)}
             </motion.button>
           )}
         </div>
-        
+
         <div className="history">
           <h3 className="historyTitle">Previous Crashes</h3>
           <div className="historyList">
@@ -157,8 +208,8 @@ const Crash = () => {
                 key={index}
                 className="historyItem"
                 style={{
-                  backgroundColor: crash < 2 ? '#fecaca' : '#86efac',
-                  color: crash < 2 ? '#dc2626' : '#059669'
+                  backgroundColor: crash < 2 ? "#fecaca" : "#86efac",
+                  color: crash < 2 ? "#dc2626" : "#059669",
                 }}
               >
                 {crash}x
@@ -167,34 +218,36 @@ const Crash = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="gameArea">
         <div className="multiplierDisplay">
           {crashed ? (
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
-              style={{color: '#dc2626'}}
+              style={{ color: "#dc2626" }}
               className="multiplier"
             >
               CRASHED @ {multiplier.toFixed(2)}x
             </motion.div>
           ) : (
-            <div className="multiplier">
-              {multiplier.toFixed(2)}x
-            </div>
+            <div className="multiplier">{multiplier.toFixed(2)}x</div>
           )}
         </div>
-        
+
         <div className="graphContainer">
           <div className="progressBar">
             <motion.div
               className="progress"
               style={{
-                width: gameActive ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%` : '0%',
-                backgroundColor: crashed ? '#dc2626' : '#2563eb'
+                width: gameActive
+                  ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%`
+                  : "0%",
+                backgroundColor: crashed ? "#dc2626" : "#2563eb",
               }}
               animate={{
-                width: gameActive ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%` : '0%'
+                width: gameActive
+                  ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%`
+                  : "0%",
               }}
               transition={{ duration: 0.1 }}
             />
