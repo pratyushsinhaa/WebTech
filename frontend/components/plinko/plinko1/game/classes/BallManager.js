@@ -39,7 +39,7 @@ import {
     }
   
     drawObstacles() {
-      this.ctx.fillStyle = "white"
+      this.ctx.fillStyle = "black"
       this.obstacles.forEach(obstacle => {
         this.ctx.beginPath()
         this.ctx.arc(
