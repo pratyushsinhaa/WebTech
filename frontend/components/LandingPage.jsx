@@ -1,11 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(to bottom, #A4D7E1, #FFFFFF)", // Soft Blue to White gradient
+    background: "linear-gradient(to bottom, #A4D7E1, #FFFFFF)",
+    fontFamily: 'Quicksand, sans-serif',
   },
   nav: {
     position: "fixed",
@@ -25,16 +28,18 @@ const styles = {
   logo: {
     fontSize: "1.5rem",
     fontWeight: 600,
-    color: "#004D4D", // Dark Blue
+    color: "#004D4D",
+    fontFamily: 'Comfortaa, cursive',
   },
   button: {
-    backgroundColor: "#004D4D", // Dark Blue
+    backgroundColor: "#004D4D",
     color: "#FFFFFF",
     padding: "0.5rem 1rem",
     borderRadius: "0.5rem",
     border: "none",
     cursor: "pointer",
     transition: "background-color 0.2s",
+    fontFamily: 'Quicksand, sans-serif',
   },
   mainContent: {
     maxWidth: "1152px",
@@ -48,14 +53,17 @@ const styles = {
   heroTitle: {
     fontSize: "3rem",
     fontWeight: "bold",
-    color: "#004D4D", // Dark Blue
+    color: "#004D4D",
     marginBottom: "1.5rem",
+    fontFamily: 'Comfortaa, cursive',
   },
   heroParagraph: {
     fontSize: "1.25rem",
-    color: "#475569", // Medium gray for contrast
+    color: "#475569",
     maxWidth: "42rem",
     margin: "0 auto 2rem auto",
+    fontFamily: 'Quicksand, sans-serif',
+    lineHeight: "1.8",
   },
   featureGrid: {
     display: "grid",
@@ -64,7 +72,7 @@ const styles = {
     padding: "4rem 0",
   },
   featureCard: {
-    backgroundColor: "#FFFFFF", // White for contrast
+    backgroundColor: "#FFFFFF",
     padding: "1.5rem",
     borderRadius: "0.75rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -72,11 +80,14 @@ const styles = {
   featureTitle: {
     fontSize: "1.25rem",
     fontWeight: 600,
-    color: "#A4D7E1", // Soft Blue
+    color: "#A4D7E1",
     marginBottom: "1rem",
+    fontFamily: 'Comfortaa, cursive',
   },
   featureText: {
-    color: "#475569", // Medium gray for readability
+    color: "#475569",
+    fontFamily: 'Quicksand, sans-serif',
+    lineHeight: "1.6",
   },
   gamesGrid: {
     display: "grid",
@@ -85,7 +96,7 @@ const styles = {
     padding: "4rem 0",
   },
   gameCard: {
-    backgroundColor: "#FFFFFF", // White for contrast
+    backgroundColor: "#FFFFFF",
     padding: "1rem",
     borderRadius: "0.5rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
