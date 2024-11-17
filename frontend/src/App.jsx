@@ -18,6 +18,7 @@ import Mines from "../components/Mines";
 import Wallet from "../components/walletPage";
 import './index.css';
 import Craps from "../components/Craps.jsx";
+import NoGamble from "../components/NoGamble"; // Add this import
 
 const App = () => {
   return (
@@ -37,8 +38,8 @@ const App = () => {
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/games/blackjack" element={<BlackjackGame />} />
         <Route path="/games/wheel" element={<Wheel />} />
+        <Route path="/nogamble" element={<NoGamble />} /> {/* Add this route */}
         <Route path="/" element={<LandingPage />} />
-        
       </Routes>
     </Router>
   );
