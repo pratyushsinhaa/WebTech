@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const DiceGame = () => {
   const [sliderValue, setSliderValue] = useState(50);
@@ -7,39 +8,110 @@ const DiceGame = () => {
   const [multiplier, setMultiplier] = useState(2);
   const [result, setResult] = useState(null);
   const [isRolling, setIsRolling] = useState(false);
-  const [gameBalance, setGameBalance] = useState(1000);
+  const [balance, setBalance] = useState(0);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch initial wallet balance
+  useEffect(() => {
+    fetchWalletBalance();
+  }, []);
+
+  // Recalculate multiplier when slider value changes
   useEffect(() => {
     const newMultiplier = (100 / sliderValue).toFixed(2);
     setMultiplier(newMultiplier);
   }, [sliderValue]);
 
-  const handleRoll = () => {
-    if (isRolling || betAmount > gameBalance || betAmount <= 0) return;
+  const fetchWalletBalance = async () => {
+    const token = localStorage.getItem("authToken");
     
+    if (!token) {
+      setError("No token found, please log in.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get("http://localhost:3000/wallet", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      setBalance(response.data.balance);
+      setIsLoading(false);
+    } catch (err) {
+      setError("Failed to fetch wallet balance");
+      setIsLoading(false);
+    }
+  };
+
+  const updateWalletBalance = async (newBalance, gameResult, bet) => {
+    const token = localStorage.getItem("authToken");
+    
+    if (!token) {
+      setError("No token found, please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/wallet/update",
+        {
+          balance: newBalance,
+          gameResult: gameResult,
+          betAmount: bet
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      setBalance(response.data.balance);
+    } catch (err) {
+      setError("Failed to update wallet balance");
+      // Refresh balance to ensure consistency
+      fetchWalletBalance();
+    }
+  };
+
+  const handleRoll = async () => {
+    if (isRolling || betAmount > balance || betAmount <= 0) return;
+
     setIsRolling(true);
     const randomNumber = Math.random() * 100;
     const won = randomNumber <= sliderValue;
-    
-    setTimeout(() => {
+
+    setTimeout(async () => {
       const payout = won ? betAmount * multiplier : 0;
+      const newBalance = won ? 
+        balance + (betAmount * (multiplier - 1)) : 
+        balance - betAmount;
+
       setResult({
         won,
         number: randomNumber.toFixed(2),
         payout
       });
-      
-      setGameBalance(prev => 
-        won ? prev + (betAmount * (multiplier - 1)) : prev - betAmount
+
+      // Update balance in backend
+      await updateWalletBalance(
+        newBalance,
+        won ? "player_wins" : "dealer_wins",
+        betAmount
       );
+
       setIsRolling(false);
     }, 1000);
   };
 
   const handleBetChange = (e) => {
     const value = Number(e.target.value);
-    if (value > gameBalance) {
-      setBetAmount(gameBalance);
+    if (value > balance) {
+      setBetAmount(balance);
     } else if (value < 0) {
       setBetAmount(0);
     } else {
@@ -47,14 +119,22 @@ const DiceGame = () => {
     }
   };
 
+  if (isLoading) {
+    return <div style={styles.loading}>Loading wallet...</div>;
+  }
+
+  if (error) {
+    return <div style={styles.error}>{error}</div>;
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.gameCard}>
-        <h2 style={styles.title}>Dice</h2>
+        <h2 style={styles.title}>Dice Game</h2>
         
         <div style={styles.balanceContainer}>
           <span style={styles.balanceLabel}>Balance:</span>
-          <span style={styles.balanceAmount}>${gameBalance.toFixed(2)}</span>
+          <span style={styles.balanceAmount}>₹{balance.toFixed(2)}</span>
         </div>
 
         <div style={styles.sliderContainer}>
@@ -63,7 +143,7 @@ const DiceGame = () => {
             min="1"
             max="98"
             value={sliderValue}
-            onChange={(e) => setSliderValue(e.target.value)}
+            onChange={(e) => setSliderValue(Number(e.target.value))}
             style={styles.slider}
             disabled={isRolling}
           />
@@ -93,7 +173,7 @@ const DiceGame = () => {
               style={styles.input}
               disabled={isRolling}
               min="0"
-              max={gameBalance}
+              max={balance}
             />
           </div>
           
@@ -102,10 +182,10 @@ const DiceGame = () => {
             whileTap={{ scale: 0.95 }}
             style={{
               ...styles.button,
-              opacity: (isRolling || betAmount > gameBalance || betAmount <= 0) ? 0.5 : 1
+              opacity: (isRolling || betAmount > balance || betAmount <= 0) ? 0.5 : 1
             }}
             onClick={handleRoll}
-            disabled={isRolling || betAmount > gameBalance || betAmount <= 0}
+            disabled={isRolling || betAmount > balance || betAmount <= 0}
           >
             {isRolling ? 'Rolling...' : 'Roll Dice'}
           </motion.button>
@@ -122,7 +202,7 @@ const DiceGame = () => {
           >
             <span style={styles.resultNumber}>{result.number}</span>
             <span style={styles.resultText}>
-              {result.won ? `Won $${result.payout.toFixed(2)}` : 'Lost'}
+              {result.won ? `Won ₹${result.payout.toFixed(2)}` : 'Lost'}
             </span>
           </motion.div>
         )}
@@ -131,7 +211,19 @@ const DiceGame = () => {
   );
 };
 
+
 const styles = {
+  // ... (keeping all existing styles)
+  loading: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#64748b',
+  },
+  error: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#ef4444',
+  },
   container: {
     minHeight: "100vh",
     background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
@@ -236,3 +328,107 @@ const styles = {
 };
 
 export default DiceGame;
+
+// const styles = {
+//   container: {
+//     minHeight: "100vh",
+//     background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
+//     padding: "6rem 1rem",
+//   },
+//   gameCard: {
+//     maxWidth: "800px",
+//     margin: "0 auto",
+//     backgroundColor: "white",
+//     borderRadius: "0.75rem",
+//     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+//     padding: "2rem",
+//   },
+//   balanceContainer: {
+//     display: "flex",
+//     justifyContent: "flex-end",
+//     alignItems: "center",
+//     marginBottom: "1.5rem",
+//   },
+//   balanceLabel: {
+//     color: "#64748b",
+//     marginRight: "0.5rem",
+//   },
+//   balanceAmount: {
+//     color: "#1e293b",
+//     fontWeight: "600",
+//     fontSize: "1.25rem",
+//   },
+//   title: {
+//     fontSize: "1.5rem",
+//     fontWeight: 600,
+//     color: "#1e293b",
+//     marginBottom: "1rem",
+//   },
+//   sliderContainer: {
+//     marginBottom: "2rem",
+//   },
+//   slider: {
+//     width: "100%",
+//     height: "8px",
+//     backgroundColor: "#e2e8f0",
+//     borderRadius: "4px",
+//     outline: "none",
+//     WebkitAppearance: "none",
+//     cursor: "pointer",
+//   },
+//   sliderInfo: {
+//     display: "flex",
+//     justifyContent: "space-between",
+//     marginTop: "1rem",
+//   },
+//   label: {
+//     color: "#64748b",
+//     display: "block",
+//     marginBottom: "0.5rem",
+//     fontSize: "0.875rem",
+//   },
+//   value: {
+//     color: "#1e293b",
+//     fontWeight: "600",
+//   },
+//   betControls: {
+//     display: "flex",
+//     gap: "1rem",
+//     alignItems: "flex-end",
+//     marginBottom: "2rem",
+//   },
+//   betAmount: {
+//     flex: 1,
+//   },
+//   input: {
+//     width: "100%",
+//     padding: "0.5rem",
+//     borderRadius: "0.5rem",
+//     border: "1px solid #e2e8f0",
+//     outline: "none",
+//   },
+//   button: {
+//     backgroundColor: "#2563eb",
+//     color: "white",
+//     padding: "0.75rem 1.5rem",
+//     borderRadius: "0.5rem",
+//     border: "none",
+//     cursor: "pointer",
+//     fontWeight: "500",
+//   },
+//   result: {
+//     padding: "1rem",
+//     borderRadius: "0.5rem",
+//     color: "white",
+//     display: "flex",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//   },
+//   resultNumber: {
+//     fontSize: "1.25rem",
+//     fontWeight: "600",
+//   },
+//   resultText: {
+//     fontWeight: "500",
+//   },
+// };

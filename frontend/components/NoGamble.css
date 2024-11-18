@@ -1,114 +1,139 @@
 /* NoGamble.css */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600&family=Quicksand:wght@400;600&display=swap');
+
+/* Color variables based on LandingPage */
 :root {
-  --primary-blue: #1a365d;
-  --light-blue: #ebf8ff;
-  --accent-blue: #2b6cb0;
+  --primary-color: #004D4D; /* Dark teal */
+  --secondary-color: #A4D7E1; /* Light teal */
+  --background-gradient-start: #A4D7E1;
+  --background-gradient-end: #FFFFFF;
+  --text-color: #475569; /* Dark gray */
+  --white: #FFFFFF;
 }
 
+/* Background gradient */
 body {
-  background-color: var(--light-blue);
+  background: linear-gradient(to bottom, var(--background-gradient-start), var(--background-gradient-end));
+  font-family: 'Quicksand', sans-serif;
+  margin: 0;
 }
 
+/* Container */
 .container {
-  max-width: 1200px;
+  max-width: 1152px;
   margin: 0 auto;
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
-  color: var(--primary-blue);
+  padding: 6rem 1rem 2rem 1rem;
+  color: var(--text-color);
 }
-/* Update in NoGamble.css */
+
+/* Header */
 .header {
   text-align: center;
-  margin-bottom: 3rem;
-  padding: 1.5rem;
-  background: linear-gradient(to right, #2b6cb0, #4299e1);
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: 'Times New Roman', Times, serif;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  margin-bottom: 4rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem 1rem;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
 }
 
 .header h1 {
-  margin: 0 0 0.5rem 0;
   font-size: 2.5rem;
-  font-weight: 600;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-family: 'Comfortaa', cursive;
 }
 
 .subtitle {
-  color: white;
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin: 0;
-  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--text-color);
+  max-width: 42rem;
+  margin: 0 auto;
+  line-height: 1.8;
+  font-family: 'Quicksand', sans-serif;
 }
 
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0;
-}
-
-.stat-card {
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.stat-card h3 {
-  color: var(--accent-blue);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
+/* Sections */
 section {
   margin-bottom: 4rem;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 2rem 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(8px);
 }
 
 section h2 {
-  color: var(--primary-blue);
-  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  font-family: 'Comfortaa', cursive;
+  text-align: center;
 }
 
-.warning-list {
+/* Charts */
+.edge-chart, .loss-projection {
+  background-color: var(--white);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-top: 2rem;
+}
+
+.edge-chart canvas, .loss-projection canvas {
+  max-width: 100%;
+}
+
+/* Edge Content */
+.edge-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.edge-explanation, .edge-chart {
+  flex: 1 1 300px;
+}
+
+/* Lists */
+.warning-list, .edge-stats {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.warning-list li {
+.warning-list li, .edge-stats li {
+  background: var(--white);
+  border-left: 4px solid var(--secondary-color);
+  border-radius: 0.5rem;
+  color: var(--text-color);
   padding: 1rem;
-  margin: 0.5rem 0;
-  background: #edf2f7;
-  border-left: 4px solid var(--accent-blue);
-  border-radius: 4px;
-  color: var(--primary-blue);
+  margin-bottom: 0.5rem;
+  font-family: 'Quicksand', sans-serif;
 }
+
+
 .research {
-    margin-bottom: 2rem;
-    width: 450%; /* Ensure full width */
-  }
-  
-  .research-papers {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-    gap: 2rem;
-    margin-bottom: 2rem;
-    width: 100%;
-  }
+  width: 375%;
+  margin-bottom: 1px;
+}
+
+/* Research Papers */
+.research-papers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  width: 100%;
+}
 
 .paper {
-  padding: 2rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 4px solid var(--accent-blue);
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--secondary-color);
+  flex: 1 1 300px;
   transition: transform 0.2s ease;
 }
 
@@ -117,53 +142,54 @@ section h2 {
 }
 
 .paper h3 {
-  color: var(--primary-blue);
-  margin: 0 0 1rem 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-family: 'Comfortaa', cursive;
 }
 
-.paper p {
-  color: var(--primary-blue);
-  margin: 0.5rem 0;
+.paper p, .paper cite {
+  color: var(--text-color);
   font-size: 0.9rem;
+  font-family: 'Quicksand', sans-serif;
 }
 
-.paper cite {
-  display: block;
-  color: var(--accent-blue);
-  font-size: 0.85rem;
-  margin-top: 1rem;
-}
-
+/* Help Section */
 .help-section {
-    background: linear-gradient(to right, var(--primary-blue), var(--accent-blue));
-    color: white;
-    text-align: center;
-    padding: 2rem;
-    border-radius: 8px;
-    margin-top: 3rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    width: 450%; /* Ensure full width */
-  }
+  background: var(--primary-color);
+  color: var(--white);
+  text-align: center;
+  padding: 2rem 1rem;
+  border-radius: 0.75rem;
+  margin-top: 3rem;
+  width: 400%;
+}
 
 .help-message {
   font-size: 1.2rem;
-  font-weight: 500;
   margin: 0;
   line-height: 1.5;
-  letter-spacing: 0.01em;
+  font-family: 'Quicksand', sans-serif;
 }
+
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .research-papers {
-      grid-template-columns: 1fr; /* Stack on mobile */
-    }
-  
-  
-  .paper {
-    padding: 1.5rem;
+  .edge-content {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .help-message {
-    font-size: 1.1rem;
+
+  .research-papers {
+    flex-direction: column;
+    align-items: center;
+    width: 450%;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  section h2 {
+    font-size: 1.75rem;
   }
 }

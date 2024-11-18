@@ -38,7 +38,7 @@ const App = () => {
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/games/blackjack" element={<BlackjackGame />} />
         <Route path="/games/wheel" element={<Wheel />} />
-        <Route path="/nogamble" element={<NoGamble />} /> {/* Add this route */}
+        <Route path="/nogamble" element={<NoGamble />} />
         <Route path="/" element={<LandingPage />} />
       </Routes>
     </Router>
