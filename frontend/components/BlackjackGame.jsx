@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion } from "framer-motion";
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 const BlackjackGame = () => {
   const [deck, setDeck] = useState([]);
@@ -214,180 +217,249 @@ const BlackjackGame = () => {
   };
 
   return (
-    <div className="blackjack-container">
-      <div className="game-info">
-        <div className="balance">Balance: ₹{balance}</div>
-        <div className="bet-controls">
-          <input
-            type="number"
-            value={bet}
-            onChange={(e) => setBet(Math.max(0, Number(e.target.value)))}
-            disabled={gameStatus === 'playing'}
-            className="bet-input"
-          />
-          <button 
-            onClick={dealCards}
-            disabled={gameStatus === 'playing' || bet > balance}
-            className="game-button"
-          >
-            Deal
-          </button>
-        </div>
-      </div>
-
-      {message && (
-        <div className="message">{message}</div>
-      )}
-
-      <div className="game-area">
-        <div className="hand dealer-hand">
-          <h3>Dealer's Hand ({showDealerCards ? calculateHandValue(dealerHand) : '?'})</h3>
-          <div className="cards">
-            {dealerHand.map((card, index) => (
-              <div 
-                key={index}
-                className={`card ${(card.suit === '♥' || card.suit === '♦') ? 'red' : 'black'}`}
+    <div className="container">
+      <div className="game-wrapper">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="blackjack-container"
+        >
+          <h1 className="game-title">Blackjack</h1>
+          
+          <div className="game-info">
+            <div className="balance">Balance: ₹{balance.toFixed(2)}</div>
+            <div className="bet-controls">
+              <input
+                type="number"
+                value={bet}
+                onChange={(e) => setBet(Math.max(0, Number(e.target.value)))}
+                disabled={gameStatus === 'playing'}
+                className="bet-input"
+              />
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={dealCards}
+                disabled={gameStatus === 'playing' || bet > balance}
+                className="game-button"
               >
-                {!showDealerCards && index === 1 ? '?' : `${card.value}${card.suit}`}
-              </div>
-            ))}
+                Deal
+              </motion.button>
+            </div>
           </div>
-        </div>
-
-        <div className="hand player-hand">
-          <h3>Your Hand ({calculateHandValue(playerHand)})</h3>
-          <div className="cards">
-            {playerHand.map((card, index) => (
-              <div 
-                key={index}
-                className={`card ${(card.suit === '♥' || card.suit === '♦') ? 'red' : 'black'}`}
+  
+          {message && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="message"
+            >
+              {message}
+            </motion.div>
+          )}
+  
+          <div className="game-area">
+            <div className="hand dealer-hand">
+              <h3>Dealer's Hand ({showDealerCards ? calculateHandValue(dealerHand) : '?'})</h3>
+              <div className="cards">
+                {dealerHand.map((card, index) => (
+                  <motion.div 
+                    key={index}
+                    initial={{ rotateY: 180, scale: 0 }}
+                    animate={{ rotateY: !showDealerCards && index === 1 ? 180 : 0, scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.2 }}
+                    className={`card ${(card.suit === '♥' || card.suit === '♦') ? 'red' : 'black'}`}
+                  >
+                    {!showDealerCards && index === 1 ? '?' : `${card.value}${card.suit}`}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+  
+            <div className="hand player-hand">
+              <h3>Your Hand ({calculateHandValue(playerHand)})</h3>
+              <div className="cards">
+                {playerHand.map((card, index) => (
+                  <motion.div 
+                    key={index}
+                    initial={{ rotateY: 180, scale: 0 }}
+                    animate={{ rotateY: 0, scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.2 }}
+                    className={`card ${(card.suit === '♥' || card.suit === '♦') ? 'red' : 'black'}`}
+                  >
+                    {card.value}{card.suit}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+  
+            <div className="game-controls">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={hit}
+                disabled={gameStatus !== 'playing'}
+                className="game-button"
               >
-                {card.value}{card.suit}
-              </div>
-            ))}
+                Hit
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={stand}
+                disabled={gameStatus !== 'playing'}
+                className="game-button"
+              >
+                Stand
+              </motion.button>
+            </div>
           </div>
-        </div>
-
-        <div className="game-controls">
-          <button
-            onClick={hit}
-            disabled={gameStatus !== 'playing'}
-            className="game-button"
-          >
-            Hit
-          </button>
-          <button
-            onClick={stand}
-            disabled={gameStatus !== 'playing'}
-            className="game-button"
-          >
-            Stand
-          </button>
-        </div>
+        </motion.div>
       </div>
-
+  
       <style jsx>{`
-        .blackjack-container {
-          max-width: 800px;
-          margin: 20px auto;
-          padding: 20px;
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        .container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #A4D7E1, #FFFFFF);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        .game-info {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
+.game-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
 
+.blackjack-container {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+}
+
+.game-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #004D4D;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-family: 'Comfortaa', cursive;
+}
+
+.game-info {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.game-area {
+  gap: 1rem;
+  
+}
+
+.hand {
+  padding: 1rem;
+}
+
+.hand h3 {
+  margin-bottom: 0.75rem;
+}
         .balance {
-          font-size: 1.2em;
-          font-weight: bold;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #004D4D;
         }
-
+  
         .bet-controls {
           display: flex;
-          gap: 10px;
+          gap: 1rem;
         }
-
+  
         .bet-input {
-          padding: 5px 10px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          width: 100px;
+          padding: 0.75rem;
+          border: 2px solid #A4D7E1;
+          border-radius: 0.5rem;
+          outline: none;
+          font-family: 'Quicksand', sans-serif;
+          transition: border-color 0.2s;
         }
-
+  
+        .bet-input:focus {
+          border-color: #004D4D;
+        }
+  
         .message {
-          padding: 10px;
-          margin: 10px 0;
-          background: #f8f9fa;
-          border-radius: 4px;
+          padding: 1rem;
+          margin: 1rem 0;
+          background: rgba(255, 255, 255, 0.8);
+          border-radius: 0.75rem;
           text-align: center;
+          color: #004D4D;
+          font-weight: 500;
         }
-
-        .game-area {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .hand {
-          margin: 10px 0;
-        }
-
+  
+        
+  
         .cards {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 10px;
+          gap: 1rem;
         }
-
+  
         .card {
-          width: 60px;
-          height: 90px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
+          width: 80px;
+          height: 120px;
+          border: 2px solid #A4D7E1;
+          border-radius: 0.5rem;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.2em;
-          background: #fff;
+          font-size: 1.5rem;
+          background: white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          perspective: 1000px;
         }
-
+  
         .card.red {
-          color: red;
+          color: #dc2626;
         }
-
+  
         .card.black {
-          color: black;
+          color: #1f2937;
         }
-
+  
         .game-controls {
           display: flex;
-          gap: 10px;
-          margin-top: 20px;
+          gap: 1rem;
+          justify-content: center;
+          margin-top: 2rem;
         }
-
+  
         .game-button {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 4px;
-          background: #007bff;
+          background: #004D4D;
           color: white;
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 0.5rem;
+          font-size: 1rem;
+          font-weight: 500;
           cursor: pointer;
-          font-size: 1em;
+          font-family: 'Quicksand', sans-serif;
+          transition: all 0.2s;
         }
-
+  
         .game-button:disabled {
-          background: #ccc;
+          background: #9CA3AF;
           cursor: not-allowed;
         }
-
+  
         .game-button:hover:not(:disabled) {
-          background: #0056b3;
+          background: #003333;
         }
       `}</style>
     </div>

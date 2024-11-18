@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Wallet from "../Wallet";
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -15,90 +17,108 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const styles = {
-    container: {
-      minHeight: "100vh",
-      background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "2rem",
-    },
-    formCard: {
-      backgroundColor: "white",
-      borderRadius: "1rem",
-      padding: "2.5rem",
-      width: "100%",
-      maxWidth: "450px",
-      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: "600",
-      color: "#1e293b",
-      marginBottom: "1.5rem",
-      textAlign: "center",
-    },
-    subtitle: {
-      fontSize: "1rem",
-      color: "#64748b",
-      marginBottom: "2rem",
-      textAlign: "center",
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.25rem",
-    },
-    inputGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.5rem",
-    },
-    label: {
-      fontSize: "0.875rem",
-      color: "#475569",
-      fontWeight: "500",
-    },
-    input: {
-      padding: "0.75rem",
-      borderRadius: "0.5rem",
-      border: "1px solid #e2e8f0",
-      fontSize: "1rem",
-      transition: "all 0.2s",
-      outline: "none",
-    },
-    button: {
-      backgroundColor: "#2563eb",
-      color: "white",
-      padding: "0.875rem",
-      borderRadius: "0.5rem",
-      border: "none",
-      fontSize: "1rem",
-      fontWeight: "500",
-      cursor: "pointer",
-      transition: "background-color 0.2s",
-      marginTop: "0.5rem",
-    },
-    error: {
-      color: "#dc2626",
-      fontSize: "0.875rem",
-      textAlign: "center",
-      marginTop: "0.5rem",
-    },
-    signupPrompt: {
-      textAlign: "center",
-      marginTop: "1.5rem",
-      color: "#475569",
-      fontSize: "0.875rem",
-    },
-    signupLink: {
-      color: "#2563eb",
-      textDecoration: "none",
-      marginLeft: "0.5rem",
-      fontWeight: "500",
-    },
-  };
-
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(to bottom, #A4D7E1, #FFFFFF)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "1rem",
+    fontFamily: 'Quicksand, sans-serif',
+  },
+  formCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backdropFilter: "blur(8px)",
+    borderRadius: "0.75rem",
+    padding: "2rem",
+    width: "100%",
+    maxWidth: "400px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  title: {
+    fontSize: "2rem",
+    fontWeight: "700",
+    color: "#004D4D",
+    marginBottom: "1rem",
+    textAlign: "center",
+    fontFamily: 'Comfortaa, cursive',
+  },
+  subtitle: {
+    fontSize: "1rem",
+    color: "#475569",
+    marginBottom: "1.5rem",
+    textAlign: "center",
+    fontFamily: 'Quicksand, sans-serif',
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  inputGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
+  label: {
+    fontSize: "0.875rem",
+    color: "#004D4D",
+    fontWeight: "500",
+    fontFamily: 'Quicksand, sans-serif',
+  },
+  input: {
+    padding: "0.75rem",
+    borderRadius: "0.5rem",
+    border: "2px solid #A4D7E1",
+    fontSize: "1rem",
+    transition: "all 0.2s",
+    outline: "none",
+    fontFamily: 'Quicksand, sans-serif',
+    '&:focus': {
+      borderColor: "#004D4D",
+    }
+  },
+  button: {
+    backgroundColor: "#004D4D",
+    color: "white",
+    padding: "0.75rem",
+    borderRadius: "0.5rem",
+    border: "none",
+    fontSize: "1rem",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    marginTop: "0.5rem",
+    fontFamily: 'Quicksand, sans-serif',
+    '&:hover': {
+      backgroundColor: "#003333",
+      transform: "translateY(-1px)",
+    }
+  },
+  error: {
+    color: "#dc2626",
+    fontSize: "0.875rem",
+    textAlign: "center",
+    marginTop: "0.5rem",
+    fontFamily: 'Quicksand, sans-serif',
+  },
+  signupPrompt: {
+    textAlign: "center",
+    marginTop: "1rem",
+    color: "#475569",
+    fontSize: "0.875rem",
+    fontFamily: 'Quicksand, sans-serif',
+  },
+  signupLink: {
+    color: "#004D4D",
+    textDecoration: "none",
+    marginLeft: "0.25rem",
+    fontWeight: "500",
+    '&:hover': {
+      textDecoration: "underline",
+    }
+  },
+};
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -215,11 +235,11 @@ const LoginPage = () => {
           </Link>
         </div>
 
-        {balance !== null && (
+        {/* {balance !== null && (
           <div style={{ textAlign: "center", marginTop: "1.5rem", color: "#1e293b", fontSize: "1.25rem" }}>
             <Wallet />
           </div>
-        )}
+        )} */}
       </motion.div>
     </div>
   );

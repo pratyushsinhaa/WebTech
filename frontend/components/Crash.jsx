@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Crash.css";
 
 const Crash = () => {
+  const navigate = useNavigate();
   const [bet, setBet] = useState(0);
   const [balance, setBalance] = useState(0); // Actual wallet balance
   const [multiplier, setMultiplier] = useState(1);
@@ -139,7 +141,7 @@ const Crash = () => {
   }, [gameActive, crashed, bet, autoCashout]);
 
   return (
-    <div className="container">
+    <div className="container"> 
       <div className="sidebar">
         <h1 className="title">Crash Game</h1>
 
@@ -234,28 +236,61 @@ const Crash = () => {
           )}
         </div>
 
-        <div className="graphContainer">
-          <div className="progressBar">
-            <motion.div
-              className="progress"
-              style={{
-                width: gameActive
-                  ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%`
-                  : "0%",
-                backgroundColor: crashed ? "#dc2626" : "#2563eb",
-              }}
-              animate={{
-                width: gameActive
-                  ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%`
-                  : "0%",
-              }}
-              transition={{ duration: 0.1 }}
-            />
-          </div>
+        <div style={styles.graphContainer}>
+          <div style={styles.progressBar}>
+             <motion.div
+               style={{
+                  ...styles.progress,
+                    width: gameActive ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%` : "0%",
+                    backgroundColor: crashed ? "#dc2626" : "#2563eb",
+               }} 
+                  animate={{
+                  width: gameActive ? `${Math.min((multiplier / MAX_MULTIPLIER) * 100, 100)}%` : "0%",
+                 }}
+                transition={{ duration: 0.1 }}
+              />
+            </div>
         </div>
       </div>
     </div>
   );
+};
+
+const styles = {
+  graphContainer: {
+    width: '100%',
+    padding: '1rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '0.5rem',
+    marginBottom: '1rem',
+  },
+  progressBar: {
+    width: '100%',
+    height: '2rem',
+    backgroundColor: 'white',
+    borderRadius: '0.5rem',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  progress: {
+    height: '100%',
+    transition: 'width 0.1s ease-in-out',
+    borderRadius: '0.5rem',
+  },
+  backButton: {
+    position: 'fixed',
+    top: '1rem',
+    left: '26rem',
+    backgroundColor: '#004D4D',
+    color: 'white',
+    border: 'none',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.5rem',
+    cursor: 'pointer',
+    fontFamily: 'Quicksand, sans-serif',
+    fontSize: '1rem',
+    zIndex: 10,
+  }
 };
 
 export default Crash;

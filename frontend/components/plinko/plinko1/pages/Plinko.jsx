@@ -3,10 +3,13 @@ import { BallManager } from "../game/classes/BallManager"
 import axios from "axios"
 import '@fontsource/quicksand'
 import '@fontsource/comfortaa'
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const baseURL = "http://localhost:2000";
 
 const Plinko = () => {
+  const navigate = useNavigate();
   const [ballManager, setBallManager] = useState()
   const [betAmount, setBetAmount] = useState(0)
   const [multiplier, setMultiplier] = useState(0)
@@ -142,13 +145,16 @@ const Plinko = () => {
   return(
     <div className="min-h-screen bg-gradient-to-b from-[#A4D7E1] to-white font-['Quicksand']">
       <div className="max-w-7xl mx-auto px-4 py-8">
+        
         <h1 className="text-4xl font-bold text-center text-[#004D4D] mb-8 font-['Comfortaa']">
           Plinko
         </h1>
         
         <div className="flex flex-col lg:flex-row gap-8 items-start">
+          
           {/* Control Panel */}
           <div className="w-full lg:w-1/4 bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 space-y-6">
+          
             <h2 className="text-2xl font-semibold text-[#004D4D] font-['Comfortaa']">
               Controls
             </h2>
@@ -200,7 +206,9 @@ const Plinko = () => {
               >
                 Drop Ball
               </button>
+              
             </div>
+            
           </div>
 
           {/* Game Canvas */}

@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 const DoNotGamblePage = () => {
   const navigate = useNavigate();
@@ -8,66 +10,74 @@ const DoNotGamblePage = () => {
   const styles = {
     container: {
       minHeight: "100vh",
-      background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
+      background: "linear-gradient(to bottom, #A4D7E1, #FFFFFF)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "2rem",
+      padding: "1.5rem",
+      fontFamily: 'Quicksand, sans-serif',
     },
     card: {
-      backgroundColor: "white",
-      borderRadius: "1rem",
-      padding: "2.5rem",
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(8px)",
+      borderRadius: "0.75rem",
+      padding: "2rem",
       width: "100%",
       maxWidth: "800px",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     },
     title: {
-      fontSize: "2.5rem",
+      fontSize: "2rem",
       fontWeight: "700",
-      color: "#1e293b",
-      marginBottom: "1.5rem",
+      color: "#004D4D",
+      marginBottom: "1rem",
       textAlign: "center",
+      fontFamily: 'Comfortaa, cursive',
     },
     subtitle: {
-      fontSize: "1.5rem",
+      fontSize: "1.25rem",
       color: "#475569",
-      marginBottom: "2rem",
+      marginBottom: "1.5rem",
       textAlign: "center",
+      fontFamily: 'Quicksand, sans-serif',
     },
     section: {
-      marginBottom: "2rem",
+      marginBottom: "1.5rem",
     },
     sectionTitle: {
       fontSize: "1.25rem",
       fontWeight: "600",
-      color: "#1e293b",
-      marginBottom: "1rem",
+      color: "#004D4D",
+      marginBottom: "0.75rem",
+      fontFamily: 'Comfortaa, cursive',
     },
     content: {
       color: "#475569",
-      lineHeight: "1.8",
+      lineHeight: "1.6",
       fontSize: "1rem",
-      marginBottom: "1rem",
+      marginBottom: "0.75rem",
+      fontFamily: 'Quicksand, sans-serif',
     },
     highlight: {
-      backgroundColor: "#dbeafe",
-      padding: "1.5rem",
+      backgroundColor: "rgba(164, 215, 225, 0.2)",
+      padding: "1.25rem",
       borderRadius: "0.5rem",
-      marginBottom: "1.5rem",
+      marginBottom: "1.25rem",
+      backdropFilter: "blur(4px)",
     },
     button: {
-      backgroundColor: "#2563eb",
+      backgroundColor: "#004D4D",
       color: "white",
-      padding: "0.875rem 2rem",
+      padding: "0.75rem 1.5rem",
       borderRadius: "0.5rem",
       border: "none",
       fontSize: "1rem",
       fontWeight: "500",
       cursor: "pointer",
-      transition: "background-color 0.2s",
+      transition: "all 0.2s",
       display: "block",
-      margin: "2rem auto 0",
+      margin: "1.5rem auto 0",
+      fontFamily: 'Quicksand, sans-serif',
     },
   };
 

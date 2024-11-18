@@ -16,9 +16,9 @@ import Dice from "../components/Dice";
 import Crash from "../components/Crash";
 import Mines from "../components/Mines";
 import Wallet from "../components/walletPage";
+import NoGamble from "../components/NoGamble"; 
 import './index.css';
 import Craps from "../components/Craps.jsx";
-import NoGamble from "../components/NoGamble"; // Add this import
 
 const App = () => {
   return (

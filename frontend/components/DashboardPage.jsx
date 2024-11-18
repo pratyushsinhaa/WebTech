@@ -128,10 +128,9 @@ const DashboardPage = () => {
   };
 
   const menuItems = [
-    { name: "Home", action: () => navigate("/dashboard") },
-    { name: "Games", action: () => navigate("/games") },
+    { name: "Games", action: () => navigate("/dashboard") },
     { name: "Wallet", action: () => navigate("/wallet") },
-    { name: "Why is Gambling Bad?", action: () => navigate("/donotgamble") },
+    { name: "Why is Gambling Bad?", action: () => navigate("/nogamble") },
     { name: "About Us", action: () => navigate("/aboutus") },
     { name: "Logout", action: () => navigate("/login") },
   ];

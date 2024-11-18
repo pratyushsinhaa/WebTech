@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
+
 
 const Craps = () => {
+  const navigate = useNavigate();
+
   const [dice, setDice] = useState([1, 1]);
   const [rolling, setRolling] = useState(false);
   const [point, setPoint] = useState(null);

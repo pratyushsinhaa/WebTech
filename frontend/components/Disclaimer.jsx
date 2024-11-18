@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 const DisclaimerPage = () => {
   const navigate = useNavigate();
@@ -8,61 +10,67 @@ const DisclaimerPage = () => {
   const styles = {
     container: {
       minHeight: "100vh",
-      background: "linear-gradient(to bottom, #f8fafc, #eff6ff)",
+      background: "linear-gradient(to bottom, #E6E6FA, #FFFFFF)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "2rem",
+      padding: "1.5rem",
+      fontFamily: 'Quicksand, sans-serif',
     },
     card: {
-      backgroundColor: "white",
-      borderRadius: "1rem",
-      padding: "2.5rem",
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      backdropFilter: "blur(8px)",
+      borderRadius: "0.75rem",
+      padding: "2rem",
       width: "100%",
       maxWidth: "800px",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     },
     title: {
       fontSize: "2rem",
-      fontWeight: "600",
-      color: "#1e293b",
-      marginBottom: "1.5rem",
+      fontWeight: "700",
+      color: "#004D4D",
+      marginBottom: "1rem",
       textAlign: "center",
+      fontFamily: 'Comfortaa, cursive',
     },
     content: {
       color: "#475569",
-      lineHeight: "1.8",
-      marginBottom: "2rem",
-      fontSize: "1.125rem",
+      lineHeight: "1.6",
+      marginBottom: "1.5rem",
+      fontSize: "1rem",
+      fontFamily: 'Quicksand, sans-serif',
     },
     buttonContainer: {
       display: "flex",
       gap: "1rem",
       justifyContent: "center",
-      marginTop: "2rem",
+      marginTop: "1.5rem",
     },
     acceptButton: {
-      backgroundColor: "#2563eb",
+      backgroundColor: "#004D4D",
       color: "white",
-      padding: "0.875rem 2rem",
+      padding: "0.75rem 1.5rem",
       borderRadius: "0.5rem",
       border: "none",
       fontSize: "1rem",
       fontWeight: "500",
       cursor: "pointer",
-      transition: "background-color 0.2s",
+      transition: "all 0.2s",
+      fontFamily: 'Quicksand, sans-serif',
     },
     rejectButton: {
       backgroundColor: "#dc2626",
       color: "white",
-      padding: "0.875rem 2rem",
+      padding: "0.75rem 1.5rem",
       borderRadius: "0.5rem",
       border: "none",
       fontSize: "1rem",
       fontWeight: "500",
       cursor: "pointer",
-      transition: "background-color 0.2s",
-    },
+      transition: "all 0.2s",
+      fontFamily: 'Quicksand, sans-serif',
+    }
   };
 
   const handleAccept = () => {
