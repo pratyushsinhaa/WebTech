@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const GRID_SIZE = 5;
 
@@ -13,22 +14,15 @@ const shuffleArray = (array) => {
 
 const generateGrid = (numMines) => {
   const totalTiles = GRID_SIZE * GRID_SIZE;
-  if (numMines >= totalTiles) {
-    numMines = totalTiles - 1;
-  }
-  
-  // Create array with mines (true) and safe tiles (false)
-  const grid = Array(numMines).fill(true)
-    .concat(Array(totalTiles - numMines).fill(false));
-  
-  // Shuffle the array to randomize mine positions
+  if (numMines >= totalTiles) numMines = totalTiles - 1;
+  const grid = Array(numMines).fill(true).concat(Array(totalTiles - numMines).fill(false));
   return shuffleArray(grid);
 };
 
 const calculateMultiplier = (numMines, safeRevealed) => {
   const totalTiles = GRID_SIZE * GRID_SIZE;
   const safeTiles = totalTiles - numMines;
-  const baseMultiplier = (totalTiles / (totalTiles - numMines));
+  const baseMultiplier = totalTiles / safeTiles;
   return Math.pow(baseMultiplier, safeRevealed).toFixed(2);
 };
 
@@ -37,42 +31,107 @@ const Mines = () => {
   const [grid, setGrid] = useState(generateGrid(numMines));
   const [revealed, setRevealed] = useState(Array(GRID_SIZE * GRID_SIZE).fill(false));
   const [gameOver, setGameOver] = useState(false);
-  const [balance, setBalance] = useState(1000);
   const [bet, setBet] = useState(10);
   const [safeCount, setSafeCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const currentMultiplier = calculateMultiplier(numMines, safeCount);
   const potentialWin = (bet * currentMultiplier).toFixed(2);
 
-  const handleTileClick = (index) => {
-    if (!isPlaying || gameOver || revealed[index]) return;
-  
-    const newRevealed = [...revealed];
-    newRevealed[index] = true;
-    setRevealed(newRevealed);
-  
-    if (grid[index]) {
-      setGameOver(true);
-      setIsPlaying(false);
-    } else {
-      setSafeCount(prev => prev + 1);
+  // Fetch initial wallet balance
+  useEffect(() => {
+    const fetchWalletData = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        setError("Please log in to play");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get("http://localhost:3000/wallet", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setWalletBalance(response.data.balance);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch wallet data");
+        setLoading(false);
+      }
+    };
+
+    fetchWalletData();
+  }, []);
+
+  const updateBackendBalance = async (newBalance, gameResult) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      await axios.post(
+        "http://localhost:3000/wallet/update",
+        {
+          balance: newBalance,
+          gameResult,
+          betAmount: bet
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+    } catch (err) {
+      console.error("Failed to update balance:", err);
+      setError("Failed to update balance");
     }
   };
 
-  const handleStartGame = () => {
-    if (bet > balance || bet <= 0) return;
-    setIsPlaying(true);
-    setBalance(prev => prev - bet); 
-    handleRestart();
+  const handleTileClick = async (index) => {
+    if (!isPlaying || gameOver || revealed[index]) return;
+
+    const newRevealed = [...revealed];
+    newRevealed[index] = true;
+    setRevealed(newRevealed);
+
+    if (grid[index]) {
+      // Hit a mine - game over, lose bet
+      setGameOver(true);
+      setIsPlaying(false);
+      await updateBackendBalance(walletBalance, "bust");
+    } else {
+      setSafeCount((prev) => prev + 1);
+    }
   };
 
-  const handleCashout = () => {
+  const handleStartGame = async () => {
+    if (bet > walletBalance || bet <= 0 || !localStorage.getItem("authToken")) return;
+    
+    try {
+      const newBalance = walletBalance - bet;
+      await updateBackendBalance(newBalance, "start");
+      setWalletBalance(newBalance);
+      setIsPlaying(true);
+      handleRestart();
+    } catch (err) {
+      setError("Failed to start game");
+    }
+  };
+
+  const handleCashout = async () => {
     if (!isPlaying || gameOver) return;
-    const winnings = bet * currentMultiplier;
-    setBalance(prev => prev + Number(winnings));
-    setGameOver(true);
-    setIsPlaying(false);
+
+    try {
+      const winnings = parseFloat(potentialWin);
+      const newBalance = walletBalance + winnings;
+      await updateBackendBalance(newBalance, "player_wins");
+      setWalletBalance(newBalance);
+      setGameOver(true);
+      setIsPlaying(false);
+    } catch (err) {
+      setError("Failed to process winnings");
+    }
   };
 
   const handleRestart = () => {
@@ -82,19 +141,24 @@ const Mines = () => {
     setSafeCount(0);
   };
 
+  if (loading) return <div style={styles.container}>Loading...</div>;
+  if (error) return <div style={styles.container}>{error}</div>;
+
   return (
     <div style={styles.container}>
       <div style={styles.gameCard}>
         <h2 style={styles.title}>Mines</h2>
 
         <div style={styles.gameInfo}>
-          <div style={styles.balanceDisplay}>Balance: ${balance.toFixed(2)}</div>
+          <div style={styles.balanceDisplay}>
+            Balance: ₹{walletBalance.toFixed(2)}
+          </div>
           <div style={styles.multiplierDisplay}>
             Multiplier: {currentMultiplier}x
           </div>
           {isPlaying && (
             <div style={styles.potentialWin}>
-              Potential Win: ${potentialWin}
+              Potential Win: ₹{potentialWin}
             </div>
           )}
         </div>
@@ -105,7 +169,6 @@ const Mines = () => {
               key={index}
               whileHover={{ scale: !revealed[index] && isPlaying ? 1.05 : 1 }}
               style={styles.tile}
-              className={`${revealed[index] ? (mine ? "mine" : "safe") : ""}`}
               onClick={() => handleTileClick(index)}
             >
               {revealed[index] && (
@@ -132,7 +195,7 @@ const Mines = () => {
                 style={styles.input}
                 disabled={isPlaying}
                 min="0"
-                max={balance}
+                max={walletBalance}
               />
             </label>
             <label style={styles.label}>
@@ -144,7 +207,7 @@ const Mines = () => {
                 style={styles.input}
                 disabled={isPlaying}
                 min="1"
-                max={(GRID_SIZE * GRID_SIZE) - 1}
+                max={GRID_SIZE * GRID_SIZE - 1}
               />
             </label>
           </div>
@@ -154,14 +217,14 @@ const Mines = () => {
               whileHover={{ scale: 1.05 }}
               style={styles.button}
               onClick={handleStartGame}
-              disabled={bet > balance || bet <= 0}
+              disabled={bet > walletBalance || bet <= 0}
             >
               Start Game
             </motion.button>
           ) : (
             <motion.button
               whileHover={{ scale: 1.05 }}
-              style={{...styles.button, backgroundColor: '#10B981'}}
+              style={{ ...styles.button, backgroundColor: "#10B981" }}
               onClick={handleCashout}
               disabled={gameOver}
             >
@@ -181,12 +244,12 @@ const styles = {
     padding: "6rem 1rem",
   },
   gameCard: {
-    maxWidth: "600px", 
+    maxWidth: "600px",
     margin: "0 auto",
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: "0.75rem",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-    padding: "1.5rem", 
+    padding: "1.5rem",
   },
   title: {
     fontSize: "1.5rem",
@@ -221,20 +284,19 @@ const styles = {
     gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
     gap: "0.25rem",
     marginBottom: "1.5rem",
-    maxWidth: "400px", 
+    maxWidth: "400px",
     margin: "0 auto",
   },
-  
   tile: {
     aspectRatio: "1",
     backgroundColor: "#FFFFFF",
-    borderRadius: "0.375rem", 
+    borderRadius: "0.375rem",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "1.25rem", 
+    fontSize: "1.25rem",
     cursor: "pointer",
-    border: "1px solid #004D4D", 
+    border: "1px solid #004D4D",
     transition: "all 0.2s",
   },
   controls: {
@@ -244,7 +306,7 @@ const styles = {
   },
   inputGroup: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
     gap: "0.75rem",
     marginBottom: "0.75rem",
   },

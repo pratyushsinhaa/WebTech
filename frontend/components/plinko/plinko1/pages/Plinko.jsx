@@ -1,68 +1,146 @@
 import { useEffect, useRef, useState } from "react"
 import { BallManager } from "../game/classes/BallManager"
 import axios from "axios"
-import { Button } from "../components/ui"
-import { baseURL } from "../utils"
 import '@fontsource/quicksand'
 import '@fontsource/comfortaa'
 
+const baseURL = "http://localhost:2000";
+
 const Plinko = () => {
   const [ballManager, setBallManager] = useState()
-  const [betAmount, setBetAmount] = useState(0);
-  const [multiplier, setMultiplier] = useState(0);
-  const [result, setResult] = useState(null);
-  const [walletBalance, setWalletBalance] = useState(1000); 
-  const [showMultiplier, setShowMultiplier] = useState(false);
+  const [betAmount, setBetAmount] = useState(0)
+  const [multiplier, setMultiplier] = useState(0)
+  const [result, setResult] = useState(null)
+  const [walletBalance, setWalletBalance] = useState(0)
+  const [showMultiplier, setShowMultiplier] = useState(false)
+  const [error, setError] = useState(null)
   const canvasRef = useRef()
+
+  // Fetch initial wallet balance
+  useEffect(() => {
+    const fetchWalletBalance = async () => {
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        setError("No token found, please log in.")
+        return
+      }
+
+      try {
+        const response = await axios.get("http://localhost:3000/wallet", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setWalletBalance(response.data.balance || 0)
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error)
+        setError("Failed to fetch wallet balance.")
+      }
+    }
+
+    fetchWalletBalance()
+  }, [])
 
   useEffect(() => {
     if (canvasRef.current) {
-      const ballManager = new BallManager(canvasRef.current);
-      // Add callback for when ball lands
+      const ballManager = new BallManager(canvasRef.current)
       ballManager.onBallLand = () => {
-        setShowResult(true);
-      };
-      setBallManager(ballManager);
+        setShowResult(true)
+      }
+      setBallManager(ballManager)
     }
-  }, [canvasRef]);
+  }, [canvasRef])
+
+  const updateWalletBalance = async (newBalance, gameResult, betAmount) => {
+    const token = localStorage.getItem("authToken")
+    if (!token) {
+      setError("No token found, please log in.")
+      return
+    }
+
+    try {
+      await axios.post(
+        "http://localhost:3000/wallet/update",
+        {
+          balance: newBalance,
+          gameResult,
+          betAmount
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+    } catch (error) {
+      console.error("Error updating wallet balance:", error)
+      setError("Failed to update wallet balance.")
+    }
+  }
 
   const handleAddBall = async () => {
     try {
-      if (betAmount > walletBalance) {
-        alert("Insufficient balance!");
-        return;
+      if (betAmount <= 0) {
+        alert("Please enter a valid bet amount!")
+        return
       }
+
+      if (betAmount > walletBalance) {
+        alert("Insufficient balance!")
+        return
+      }
+
+      setResult(null)
+      setShowMultiplier(false)
       
-      setResult(null);
-      setShowMultiplier(false);
-      // Deduct bet amount immediately
-      setWalletBalance(prev => prev - betAmount);
-      
-      const url = `${baseURL}/game`;
-      console.log("Request URL:", url);
-      const response = await axios.post(url, {
+      // Deduct bet amount locally and update backend
+      const newBalance = walletBalance - betAmount
+      setWalletBalance(newBalance)
+      await updateWalletBalance(newBalance, "plinko_bet", betAmount)
+
+      const response = await axios.post(`${baseURL}/game`, {
         data: betAmount
-      });
+      })
       
       if (ballManager) {
-        ballManager.addBall(response.data.point);
+        ballManager.addBall(response.data.point)
         
         // Add delay for multiplier display
-        setTimeout(() => {
-          setShowMultiplier(true);
-          setMultiplier(response.data.multiplier);
-          const winAmount = betAmount * response.data.multiplier;
-          setResult(winAmount);
-          // Update wallet with winnings
-          setWalletBalance(prev => prev + winAmount);
-        }, 3200);
+        setTimeout(async () => {
+          setShowMultiplier(true)
+          setMultiplier(response.data.multiplier)
+          const winAmount = betAmount * response.data.multiplier
+          setResult(winAmount)
+          
+          // Update wallet with winnings and sync with backend
+          const finalBalance = newBalance + winAmount
+          setWalletBalance(finalBalance)
+          await updateWalletBalance(
+            finalBalance,
+            winAmount > betAmount ? "plinko_win" : "plinko_loss",
+            betAmount
+          )
+        }, 3200)
       }
     } catch (error) {
-      console.error("Error adding ball:", error);
+      console.error("Error in game:", error)
+      setError("Error occurred during game play.")
+      // Restore the original balance if there's an error
+      const response = await axios.get("http://localhost:3000/wallet", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      })
+      setWalletBalance(response.data.balance || 0)
     }
-  };
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center p-4">{error}</div>
+  }
+
   return(
-  <div className="min-h-screen bg-gradient-to-b from-[#A4D7E1] to-white font-['Quicksand']">
+    <div className="min-h-screen bg-gradient-to-b from-[#A4D7E1] to-white font-['Quicksand']">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center text-[#004D4D] mb-8 font-['Comfortaa']">
           Plinko
@@ -137,6 +215,7 @@ const Plinko = () => {
         </div>
       </div>
     </div>
-  );
-};
-export default Plinko;
+  )
+}
+
+export default Plinko
