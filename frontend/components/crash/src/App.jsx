@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [wallet, setWallet] = useState(1000); // Initial wallet balance
-  const [betAmount, setBetAmount] = useState(0);
+  const [wallet, setWallet] = useState(1000);
   const [multiplier, setMultiplier] = useState(1.0);
-  const [gameStatus, setGameStatus] = useState("waiting"); // "waiting" | "running" | "crashed" | "cashedOut"
+  const [gameStatus, setGameStatus] = useState("waiting");
   const [crashPoint, setCrashPoint] = useState(0);
   const [cashOutMultiplier, setCashOutMultiplier] = useState(null);
   const [profit, setProfit] = useState(0);
@@ -19,7 +18,6 @@ function App() {
       setCrashPoint(generateCrashPoint());
       setCashOutMultiplier(null);
       setProfit(0); // Reset profit
-      // Deduct bet amount from wallet (to be implemented in future)
     }
   };
 
