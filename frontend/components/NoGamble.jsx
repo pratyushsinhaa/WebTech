@@ -8,10 +8,14 @@ import {
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import './NoGamble.css';
+
+// Import fonts
+import '@fontsource/quicksand';
+import '@fontsource/comfortaa';
 
 // Register ChartJS components
 ChartJS.register(
@@ -24,7 +28,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
 const NoGamble = () => {
   const chartOptions = {
     responsive: true,
