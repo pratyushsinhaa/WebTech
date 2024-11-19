@@ -125,21 +125,21 @@ const AboutUs = () => {
   const teamMembers = [
     {
       name: "Preetham R Sanji",
-      role: "Frontend Architect",
-      description: "Mastering the art of React architecture while pushing the boundaries of modern web development. His innovative approaches and deep understanding of component lifecycle management make our applications not just functional, but extraordinary.",
+      role: "Frontender",
+      description: "Currently Running MacOS on a windows",
       imageUrl: image1
     },
     {
-      name: "Prakhar Kumar",
-      role: "Systems Engineer",
-      description: "A visionary systems architect exploring the frontiers of Rust and low-level programming. Transforming complex technical challenges into elegant solutions while maintaining peak performance and security standards.",
-      imageUrl: image2
+      name: "Pratyush Sinha",
+      role: "Middlender",
+      description: "Currently Running Windows 95 on a mac.",
+      imageUrl: image3
     },
     {
-      name: "Pratyush Sinha",
-      role: "Tech Innovation Lead",
-      description: "A technological polymath who bridges impossible gaps - from running legacy systems on modern architecture to pioneering new development paradigms. His experimental mindset drives our team's continuous evolution.",
-      imageUrl: image3
+      name: "Prakhar Kumar",
+      role: "Backender",
+      description: "Currently Running Linux on a Windows 10 on a mac",
+      imageUrl: image2
     }
   ];
 
@@ -375,7 +375,7 @@ const AboutUs = () => {
           }}
           whileTap={{ scale: 0.95 }}
         >
-          Return to Command Center
+          Return to Dashboard
         </motion.button>
       </motion.div>
     </>
