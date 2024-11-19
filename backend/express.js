@@ -40,7 +40,7 @@ app.post("/signup", userValidationSignUp, async (req, res) => {
     const newUser = new User({ username, password, firstName, lastName });
     await newUser.save();
 
-    const newAccount = new Account({ userId: newUser._id, amount: 1000 });
+    const newAccount = new Account({ userId: newUser._id, amount: 100000 });
     await newAccount.save();
 
     res.status(201).json({

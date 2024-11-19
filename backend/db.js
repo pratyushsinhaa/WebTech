@@ -48,7 +48,7 @@ const accountSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
-    default: 1000,
+    default: 100000,
     min: 0,
   },
   transactions: [
