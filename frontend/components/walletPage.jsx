@@ -163,4 +163,4 @@ const styles = {
   successNote: { color: "#065f46", marginTop: "0.5rem" },
 };
 
-export default WalletPage;
+export default WalletPage; //d
