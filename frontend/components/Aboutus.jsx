@@ -125,19 +125,19 @@ const AboutUs = () => {
   const teamMembers = [
     {
       name: "Preetham R Sanji",
-      role: "Frontender",
+      role: "Windows User",
       description: "Currently Running MacOS on a windows",
       imageUrl: image1
     },
     {
       name: "Pratyush Sinha",
-      role: "Middlender",
+      role: "Mac User",
       description: "Currently Running Windows 95 on a mac.",
       imageUrl: image3
     },
     {
       name: "Prakhar Kumar",
-      role: "Backender",
+      role: "Operating Systems User",
       description: "Currently Running Linux on a Windows 10 on a mac",
       imageUrl: image2
     }
