@@ -143,28 +143,28 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = await axios.post("http://localhost:3000/login", formData);
-      const token = response.data.token;
+  e.preventDefault();
+  setIsLoading(true);
+  try {
+    const response = await axios.post("http://localhost:3000/login", formData);
+    const token = response.data.token;
 
-      // Store the token in localStorage with the correct key 'authToken'
-      localStorage.setItem("authToken", token);
+    // Store the token in localStorage with the correct key 'authToken'
+    localStorage.setItem("authToken", token);
 
-      // Fetch and set the wallet balance
-      await fetchWalletBalance(token);
+    // Fetch and set the wallet balance
+    await fetchWalletBalance(token);
 
-      navigate("/dashboard");
-    } catch (error) {
-      setError(
-        error.response?.data?.message || 
-        "Invalid username or password"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    navigate("/dashboard");
+  } catch (error) {
+    setError(
+      error.response?.data?.message || 
+      "Invalid username or password"
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
