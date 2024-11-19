@@ -138,7 +138,7 @@ const LoginPage = () => {
       setBalance(response.data.balance);
     } catch (error) {
       console.error("Failed to fetch wallet balance:", error);
-      setError("Failed to retrieve wallet balance");
+      // setError("Failed to retrieve wallet balance");
     }
   };
 
