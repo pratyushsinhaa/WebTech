@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 const { User, Account } = require("./db");
 const { userValidationSignUp, userValidationLogin } = require("./auth");
 
@@ -11,6 +12,10 @@ const JWT_SECRET = "your_jwt_secret";
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const buildPath =
+  (__dirname, "/Users/prakhar/wr-project-final/WebTech/frontend/dist"); //
+app.use(express.static(buildPath));
 
 const authenticateToken = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
