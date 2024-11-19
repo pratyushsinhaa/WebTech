@@ -26,7 +26,8 @@ const WalletPage = () => {
       });
 
       const data = response.data;
-      setBalance(data.balance || 0);
+      // Ensure the balance is set to 0 if not defined
+      setBalance(Number(data.balance) || 0); 
       setLoading(false);
     } catch (err) {
       console.error("Error fetching wallet data:", err);
@@ -163,4 +164,4 @@ const styles = {
   successNote: { color: "#065f46", marginTop: "0.5rem" },
 };
 
-export default WalletPage; //d
+export default WalletPage;
