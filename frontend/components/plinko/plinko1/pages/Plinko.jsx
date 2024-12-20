@@ -3,10 +3,9 @@ import { BallManager } from "../game/classes/BallManager"
 import axios from "axios"
 import '@fontsource/quicksand'
 import '@fontsource/comfortaa'
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-const baseURL = "http://localhost:2000";
+const baseURL = "http://localhost:3000";
 
 const Plinko = () => {
   const navigate = useNavigate();
